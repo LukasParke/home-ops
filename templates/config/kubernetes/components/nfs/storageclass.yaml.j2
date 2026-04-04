@@ -1,0 +1,18 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: nfs.csi.k8s.io
+parameters:
+  # Update these values to match your NFS server
+  # You can use template variables like: server: "#{ nfs_server }#"
+  server: "#{ nfs_server | default('YOUR_NFS_SERVER_IP_OR_HOSTNAME') }#"
+  share: "#{ nfs_share | default('/path/to/nfs/share') }#"
+  mountOptions: "nfsvers=4.1,proto=tcp"
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+reclaimPolicy: Retain
+
