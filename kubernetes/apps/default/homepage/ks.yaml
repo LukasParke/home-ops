@@ -6,7 +6,7 @@ metadata:
 spec:
   dependsOn:
     - name: csi-driver-nfs
-      namespace: flux-system
+      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/default/homepage/app
   postBuild:
