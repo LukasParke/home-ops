@@ -7,12 +7,10 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "false"
 provisioner: nfs.csi.k8s.io
 parameters:
-  # Update these values to match your NFS server
-  # You can use template variables like: server: ""
-  server: "YOUR_NFS_SERVER_IP_OR_HOSTNAME"
-  share: "/path/to/nfs/share"
-  mountOptions: "nfsvers=4.1,proto=tcp"
+  server: "10.10.10.215"
+  share: "/mnt/user/home-ops"
+mountOptions:
+  - nfsvers=4.1
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
 reclaimPolicy: Retain
-
