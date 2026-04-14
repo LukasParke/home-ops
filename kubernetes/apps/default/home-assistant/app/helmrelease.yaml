@@ -3,43 +3,32 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: sonarr
+  name: home-assistant
 spec:
   chartRef:
     kind: OCIRepository
-    name: sonarr
+    name: home-assistant
   interval: 1h
   values:
     controllers:
-      sonarr:
+      home-assistant:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/home-operations/sonarr
-              tag: 4.0.17.2953@sha256:83607d2b741ec9469db09489e88c473ae6fdf7d85f3b55d4fa809b43e25a2a6c
+              repository: ghcr.io/home-assistant/home-assistant
+              tag: 2025.4.1@sha256:f1124969a856aff5696b208c52c1743e093f32049202aac742fbd6358a2ecc90
             env:
-              SONARR__APP__INSTANCENAME: Sonarr
-              SONARR__APP__THEME: dark
-              SONARR__AUTH__METHOD: External
-              SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
-              SONARR__LOG__DBENABLED: "False"
-              SONARR__LOG__LEVEL: info
-              SONARR__SERVER__PORT: &port 80
-              SONARR__UPDATE__BRANCH: develop
               TZ: Etc/UTC
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /ping
-                    port: *port
+                    path: /
+                    port: &port 8123
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 5
@@ -48,7 +37,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /ping
+                    path: /
                     port: *port
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -56,24 +45,18 @@ spec:
               startup:
                 enabled: true
                 spec:
-                  failureThreshold: 30
+                  failureThreshold: 60
                   periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 100m
+                memory: 512Mi
               limits:
-                memory: 4Gi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
+                memory: 2Gi
     service:
       app:
         ports:
@@ -81,9 +64,9 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["hass.${SECRET_DOMAIN}"]
         parentRefs:
-          - name: envoy-internal
+          - name: envoy-external
             namespace: network
             sectionName: https
         rules:
@@ -99,18 +82,5 @@ spec:
         size: 10Gi
         globalMounts:
           - path: /config
-      scripts:
-        type: configMap
-        name: sonarr-configmap
-        defaultMode: 0775
-        globalMounts:
-          - path: /scripts
-            readOnly: true
-      media:
-        type: nfs
-        server: "${MEDIA_NFS_SERVER}"
-        path: "${MEDIA_NFS_PATH}"
-        globalMounts:
-          - path: /media
       tmp:
         type: emptyDir
