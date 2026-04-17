@@ -64,7 +64,7 @@ spec:
             port: *port
     route:
       app:
-        hostnames: ["hass.${SECRET_DOMAIN}"]
+        hostnames: ["homeassistant.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
             namespace: network
