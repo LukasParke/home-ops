@@ -15,3 +15,4 @@ resources:
   - ./sonarr/ks.yaml
   - ./lidarr/ks.yaml
   - ./home-assistant/ks.yaml
+  - ./vaultwarden/ks.yaml
