@@ -23,7 +23,7 @@ spec:
               DOMAIN: "https://vault.${SECRET_DOMAIN}"
               DATA_FOLDER: /data
               ROCKET_PORT: &port 8080
-              SIGNUPS_ALLOWED: "false"
+              SIGNUPS_ALLOWED: "true"
               INVITATIONS_ALLOWED: "false"
               WEBSOCKET_ENABLED: "true"
               PASSWORD_HINTS_ALLOWED: "false"
