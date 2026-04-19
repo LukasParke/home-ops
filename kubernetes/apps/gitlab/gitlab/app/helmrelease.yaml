@@ -6,6 +6,24 @@ metadata:
 spec:
   interval: 24h
   timeout: 45m
+  # Override cluster-apps Helm defaults: GitLab often has no prior successful release to roll back to.
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+    strategy:
+      name: RetryOnFailure
+  upgrade:
+    cleanupOnFail: true
+    crds: CreateReplace
+    remediation:
+      remediateLastFailure: false
+      retries: 0
+    strategy:
+      name: RemediateOnFailure
+  rollback:
+    cleanupOnFail: true
+    recreate: true
   chart:
     spec:
       chart: gitlab
