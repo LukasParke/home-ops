@@ -40,14 +40,17 @@ spec:
     certmanager-issuer:
       email: "luke@parke.dev"
     postgresql:
-      persistence:
-        enabled: true
-        size: 10Gi
+      primary:
+        persistence:
+          enabled: true
+          size: 10Gi
+          storageClass: nfs
     redis:
       master:
         persistence:
           enabled: true
           size: 4Gi
+          storageClass: nfs
     gitlab:
       webservice:
         minReplicas: 1
@@ -59,3 +62,7 @@ spec:
         persistence:
           enabled: true
           size: 20Gi
+          storageClass: nfs
+    minio:
+      persistence:
+        storageClass: nfs
