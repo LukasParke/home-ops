@@ -1,0 +1,25 @@
+---
+# Fallback when gateway-httproute source does not publish GitLab chart routes to Cloudflare.
+# Same pattern as network/cloudflare-tunnel DNSEndpoint → CNAME to external.${SECRET_DOMAIN}.
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: gitlab-public-names
+spec:
+  endpoints:
+    - dnsName: "gitlab.${SECRET_DOMAIN}"
+      recordType: CNAME
+      targets:
+        - "external.${SECRET_DOMAIN}"
+    - dnsName: "kas.${SECRET_DOMAIN}"
+      recordType: CNAME
+      targets:
+        - "external.${SECRET_DOMAIN}"
+    - dnsName: "registry.${SECRET_DOMAIN}"
+      recordType: CNAME
+      targets:
+        - "external.${SECRET_DOMAIN}"
+    - dnsName: "minio.${SECRET_DOMAIN}"
+      recordType: CNAME
+      targets:
+        - "external.${SECRET_DOMAIN}"
