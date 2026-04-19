@@ -16,3 +16,6 @@ resources:
   - ./lidarr/ks.yaml
   - ./home-assistant/ks.yaml
   - ./vaultwarden/ks.yaml
+  - ./immich/ks.yaml
+  - ./termix-guacd/ks.yaml
+  - ./termix/ks.yaml

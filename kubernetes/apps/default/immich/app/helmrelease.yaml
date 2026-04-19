@@ -1,0 +1,68 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: immich
+  interval: 1h
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              DB_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-database-immich
+                    key: uri
+    immich:
+      metrics:
+        enabled: true
+      persistence:
+        library:
+          existingClaim: immich-library
+    valkey:
+      enabled: true
+      persistence:
+        data:
+          enabled: true
+          size: 2Gi
+          type: persistentVolumeClaim
+          storageClass: nfs
+          accessMode: ReadWriteOnce
+    server:
+      route:
+        main:
+          hostnames:
+            - "immich.${SECRET_DOMAIN}"
+          parentRefs:
+            - name: envoy-external
+              namespace: network
+              sectionName: https
+          rules:
+            - backendRefs:
+                - identifier: main
+                  port: http
+      controllers:
+        main:
+          containers:
+            main:
+              resources:
+                requests:
+                  cpu: 250m
+                  memory: 512Mi
+                limits:
+                  memory: 2Gi
+    machine-learning:
+      enabled: true
+      persistence:
+        cache:
+          enabled: true
+          size: 8Gi
+          type: persistentVolumeClaim
+          storageClass: nfs
+          accessMode: ReadWriteOnce
