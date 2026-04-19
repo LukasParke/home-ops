@@ -17,7 +17,7 @@ spec:
               DB_URL:
                 valueFrom:
                   secretKeyRef:
-                    name: immich-database-immich
+                    name: immich-database-app
                     key: uri
     immich:
       metrics:
