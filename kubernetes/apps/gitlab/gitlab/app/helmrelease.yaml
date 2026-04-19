@@ -71,6 +71,8 @@ spec:
           storageClass: nfs
     gitlab:
       webservice:
+        gatewayRoute:
+          sectionName: https
         minReplicas: 1
         maxReplicas: 2
       sidekiq:
@@ -81,6 +83,14 @@ spec:
           enabled: true
           size: 20Gi
           storageClass: nfs
+    registry:
+      gatewayRoute:
+        sectionName: https
+    kas:
+      gatewayRoute:
+        sectionName: https
     minio:
+      gatewayRoute:
+        sectionName: https
       persistence:
         storageClass: nfs
