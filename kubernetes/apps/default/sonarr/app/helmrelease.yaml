@@ -29,9 +29,11 @@ spec:
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
               TZ: Etc/UTC
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+              SONARR__AUTH__APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: SONARR__AUTH__APIKEY
             probes:
               liveness:
                 enabled: true

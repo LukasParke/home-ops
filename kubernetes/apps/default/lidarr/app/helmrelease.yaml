@@ -29,9 +29,11 @@ spec:
               LIDARR__SERVER__PORT: &port 80
               LIDARR__UPDATE__BRANCH: develop
               TZ: Etc/UTC
-            envFrom:
-              - secretRef:
-                  name: "{{ .Release.Name }}-secret"
+              LIDARR__AUTH__APIKEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: LIDARR__AUTH__APIKEY
             probes:
               liveness:
                 enabled: true
