@@ -18,6 +18,22 @@ spec:
             mode: cluster
             ingress: true
             gateway: true
+      widgets:
+        enabled: true
+        data:
+          widgets.yaml: |
+            - kubernetes:
+                cluster:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+                  label: Cluster
+                nodes:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
     controllers:
       homepage:
         serviceAccount:
@@ -70,8 +86,25 @@ spec:
               - path: /app/config/kubernetes.yaml
                 subPath: kubernetes.yaml
                 readOnly: true
+      widgets-config:
+        enabled: true
+        type: configMap
+        identifier: widgets
+        advancedMounts:
+          homepage:
+            app:
+              - path: /app/config/widgets.yaml
+                subPath: widgets.yaml
+                readOnly: true
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Homepage
+          gethomepage.dev/description: Application dashboard
+          gethomepage.dev/group: Cluster
+          gethomepage.dev/icon: homepage.png
+          gethomepage.dev/href: "https://homepage.${SECRET_DOMAIN}"
         hostnames: ["homepage.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external

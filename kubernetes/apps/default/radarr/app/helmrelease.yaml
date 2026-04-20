@@ -81,6 +81,15 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Radarr
+          gethomepage.dev/description: Movie indexer & library manager
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: radarr.png
+          gethomepage.dev/href: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+          gethomepage.dev/widget.type: radarr
+          gethomepage.dev/widget.url: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal

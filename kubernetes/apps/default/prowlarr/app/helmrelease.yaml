@@ -81,6 +81,15 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Prowlarr
+          gethomepage.dev/description: Indexer manager
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: prowlarr.png
+          gethomepage.dev/href: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+          gethomepage.dev/widget.type: prowlarr
+          gethomepage.dev/widget.url: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal

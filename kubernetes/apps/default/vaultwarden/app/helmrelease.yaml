@@ -74,6 +74,15 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Vaultwarden
+          gethomepage.dev/description: Password manager
+          gethomepage.dev/group: Security
+          gethomepage.dev/icon: vaultwarden.png
+          gethomepage.dev/href: "https://vault.${SECRET_DOMAIN}"
+          gethomepage.dev/widget.type: vaultwarden
+          gethomepage.dev/widget.url: "https://vault.${SECRET_DOMAIN}"
         hostnames: ["vault.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external

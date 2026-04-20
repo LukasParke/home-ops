@@ -81,6 +81,15 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Lidarr
+          gethomepage.dev/description: Music library manager
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: lidarr.png
+          gethomepage.dev/href: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+          gethomepage.dev/widget.type: lidarr
+          gethomepage.dev/widget.url: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal

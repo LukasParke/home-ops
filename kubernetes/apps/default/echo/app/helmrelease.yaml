@@ -60,6 +60,13 @@ spec:
           - port: http
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Echo
+          gethomepage.dev/description: HTTP debug echo service
+          gethomepage.dev/group: Tools
+          gethomepage.dev/icon: mdi-server-network
+          gethomepage.dev/href: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
