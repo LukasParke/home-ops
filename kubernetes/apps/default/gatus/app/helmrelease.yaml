@@ -1,0 +1,104 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gatus
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gatus
+  interval: 1h
+  values:
+    fullnameOverride: gatus
+    configMaps:
+      gatus-config:
+        enabled: true
+        data:
+          config.yaml: |
+            storage:
+              type: memory
+            ui:
+              title: Status
+              header: Gatus
+            endpoints:
+              - name: Homepage
+                url: "https://homepage.${SECRET_DOMAIN}"
+                interval: 5m
+                conditions:
+                  - "[STATUS] == 200"
+              - name: SailPoint Developer Docs
+                url: "https://developer.sailpoint.com"
+                interval: 5m
+                conditions:
+                  - "[STATUS] == 200"
+    controllers:
+      gatus:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/twinproduction/gatus
+              tag: v5.37.0
+            args:
+              - --config
+              - /config/config.yaml
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 8080
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    persistence:
+      gatus-config:
+        enabled: true
+        type: configMap
+        identifier: gatus-config
+        advancedMounts:
+          gatus:
+            app:
+              - path: /config/config.yaml
+                subPath: config.yaml
+                readOnly: true
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Gatus
+          gethomepage.dev/description: Service health dashboard
+          gethomepage.dev/group: Observability
+          gethomepage.dev/icon: mdi-heart-pulse
+          gethomepage.dev/href: "https://gatus.${SECRET_DOMAIN}"
+        hostnames: ["gatus.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port

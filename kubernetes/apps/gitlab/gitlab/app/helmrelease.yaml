@@ -58,17 +58,26 @@ spec:
     certmanager-issuer:
       email: "luke@parke.dev"
     postgresql:
+      # NFS volumes often need Bitnami ownership fix; without it Postgres/Redis probes fail intermittently.
+      volumePermissions:
+        enabled: true
       primary:
         persistence:
           enabled: true
           size: 10Gi
           storageClass: nfs
     redis:
+      volumePermissions:
+        enabled: true
       master:
         persistence:
           enabled: true
           size: 4Gi
           storageClass: nfs
+        # Append-only files on NFS commonly hit permission/MISCONF errors; RDB snapshots still persist.
+        extraFlags:
+          - "--appendonly"
+          - "no"
     gitlab:
       webservice:
         gatewayRoute:

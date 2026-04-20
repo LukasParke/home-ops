@@ -1,0 +1,102 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ghostfolio
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: ghostfolio
+  interval: 1h
+  values:
+    fullnameOverride: ghostfolio
+    controllers:
+      ghostfolio:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghostfolio/ghostfolio
+              tag: "2.254.0"
+            env:
+              NODE_ENV: production
+              HOST: "0.0.0.0"
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: ghostfolio-database-app
+                    key: uri
+              REDIS_HOST: ghostfolio-valkey.default.svc.cluster.local
+              REDIS_PORT: "6379"
+              ACCESS_TOKEN_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: GHOSTFOLIO_ACCESS_TOKEN_SECRET
+              JWT_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: GHOSTFOLIO_JWT_SECRET_KEY
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 3333
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 5
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  failureThreshold: 60
+                  periodSeconds: 10
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Ghostfolio
+          gethomepage.dev/description: Portfolio tracker
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: ghostfolio.png
+          gethomepage.dev/href: "https://ghostfolio.${SECRET_DOMAIN}"
+        hostnames: ["ghostfolio.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port

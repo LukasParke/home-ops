@@ -34,6 +34,69 @@ spec:
                   cpu: true
                   memory: true
                   showLabel: true
+      services:
+        enabled: true
+        data:
+          services.yaml: |
+            - Homelab:
+                - Unraid:
+                    icon: unraid.png
+                    href: ${UNRAID_URL}
+                    description: NAS / hypervisor
+                    widget:
+                      type: unraid
+                      url: ${UNRAID_URL}
+                      key: ${UNRAID_API_KEY}
+                - qBittorrent:
+                    icon: qbittorrent.png
+                    href: ${QBITTORRENT_URL}
+                    description: Torrent client
+                    widget:
+                      type: qbittorrent
+                      url: ${QBITTORRENT_URL}
+                      username: ${QBITTORRENT_USERNAME}
+                      password: ${QBITTORRENT_PASSWORD}
+                - Plex:
+                    icon: plex.png
+                    href: ${PLEX_URL}
+                    description: Media server
+                    widget:
+                      type: plex
+                      url: ${PLEX_URL}
+                      key: ${PLEX_TOKEN}
+                - Cloudflare Tunnel:
+                    icon: cloudflare.png
+                    href: https://one.dash.cloudflare.com/${CLOUDFLARE_ACCOUNT_ID}
+                    description: Tunnel status
+                    widget:
+                      type: cloudflared
+                      accountid: ${CLOUDFLARE_ACCOUNT_ID}
+                      tunnelid: ${CLOUDFLARE_TUNNEL_ID}
+                      key: ${CLOUDFLARE_TUNNEL_API_TOKEN}
+            - Cluster apps:
+                - Tautulli:
+                    icon: tautulli.png
+                    href: https://tautulli.${SECRET_DOMAIN}
+                    description: Plex analytics
+                    widget:
+                      type: tautulli
+                      url: https://tautulli.${SECRET_DOMAIN}
+                      key: ${TAUTULLI_API_KEY}
+                - Gatus:
+                    icon: mdi-monitor-dashboard
+                    href: https://gatus.${SECRET_DOMAIN}
+                    description: Status checks
+                    widget:
+                      type: gatus
+                      url: https://gatus.${SECRET_DOMAIN}
+                - Ghostfolio:
+                    icon: ghostfolio.png
+                    href: https://ghostfolio.${SECRET_DOMAIN}
+                    description: Portfolio tracker
+                    widget:
+                      type: ghostfolio
+                      url: https://ghostfolio.${SECRET_DOMAIN}
+                      key: ${GHOSTFOLIO_WIDGET_BEARER_TOKEN}
     controllers:
       homepage:
         serviceAccount:
@@ -95,6 +158,16 @@ spec:
             app:
               - path: /app/config/widgets.yaml
                 subPath: widgets.yaml
+                readOnly: true
+      services-config:
+        enabled: true
+        type: configMap
+        identifier: services
+        advancedMounts:
+          homepage:
+            app:
+              - path: /app/config/services.yaml
+                subPath: services.yaml
                 readOnly: true
     route:
       app:
