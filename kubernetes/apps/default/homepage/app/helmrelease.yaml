@@ -2,16 +2,26 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app homepage
+  name: homepage
 spec:
   chartRef:
     kind: OCIRepository
     name: homepage
   interval: 1h
   values:
-    fullnameOverride: *app
+    fullnameOverride: homepage
+    configMaps:
+      kubernetes:
+        enabled: true
+        data:
+          kubernetes.yaml: |
+            mode: cluster
+            ingress: true
+            gateway: true
     controllers:
       homepage:
+        serviceAccount:
+          name: homepage
         containers:
           app:
             image:
@@ -50,6 +60,16 @@ spec:
         size: 5Gi
         globalMounts:
           - path: /app/config
+      kubernetes-config:
+        enabled: true
+        type: configMap
+        identifier: kubernetes
+        advancedMounts:
+          homepage:
+            app:
+              - path: /app/config/kubernetes.yaml
+                subPath: kubernetes.yaml
+                readOnly: true
     route:
       app:
         hostnames: ["homepage.${SECRET_DOMAIN}"]
