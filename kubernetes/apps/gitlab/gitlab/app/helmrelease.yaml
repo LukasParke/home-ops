@@ -66,6 +66,24 @@ spec:
           enabled: true
           size: 10Gi
           storageClass: nfs
+        # Bitnami defaults use exec/pg_isready; on some Talos/containerd setups exec probes fail with
+        # "error executing setns process". TCP checks avoid exec while still validating Postgres listens.
+        customLivenessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+          successThreshold: 1
+        customReadinessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+          successThreshold: 1
     redis:
       volumePermissions:
         enabled: true
