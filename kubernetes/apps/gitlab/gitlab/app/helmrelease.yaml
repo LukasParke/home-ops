@@ -54,7 +54,7 @@ spec:
     prometheus:
       install: false
     gitlab-runner:
-      install: false
+      install: true
     certmanager-issuer:
       email: "luke@parke.dev"
     postgresql:
@@ -83,10 +83,10 @@ spec:
           enabled: true
           size: 20Gi
           storageClass: nfs
+      kas:
+        gatewayRoute:
+          sectionName: https
     registry:
-      gatewayRoute:
-        sectionName: https
-    kas:
       gatewayRoute:
         sectionName: https
     minio:
