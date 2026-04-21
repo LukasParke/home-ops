@@ -10,6 +10,8 @@ spec:
   interval: 1h
   values:
     fullnameOverride: ghostfolio-valkey
+    # Ephemeral Valkey today. If you enable persistence.data with CSI nfs (ReadWriteOnce),
+    # add `strategy: Recreate` under controllers.valkey — see kubernetes/docs/storage-nfs.md.
     controllers:
       valkey:
         containers:
