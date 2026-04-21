@@ -99,6 +99,7 @@ spec:
                       key: ${GHOSTFOLIO_WIDGET_BEARER_TOKEN}
     controllers:
       homepage:
+        strategy: Recreate
         serviceAccount:
           name: homepage
         containers:

@@ -36,8 +36,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/twinproduction/gatus
-              tag: v5.37.0
+              repository: docker.io/twinproduction/gatus
+              tag: v5.35.0
             args:
               - --config
               - /config/config.yaml
