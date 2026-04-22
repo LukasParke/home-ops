@@ -4,20 +4,26 @@ SCRIPTS := $(REPO_ROOT)/scripts
 
 .DEFAULT_GOAL := help
 
-.PHONY: help monitor monitor-watch app-errors reconcile-hr reconcile-ks
+.PHONY: help monitor monitor-watch app-errors reconcile-hr reconcile-ks nfs-triage
 
 help:
 	@echo "Targets:"
 	@echo "  make monitor              Flux KS/HR health, Git source; groups identical error lines to find one root cause."
 	@echo "  make monitor-watch       Same as monitor every 8s (needs watch(1))."
+	@echo "  make nfs-triage          CSI NFS + not-Ready HRs + PVC pods (add RECONCILE=1 to also flux reconcile)."
 	@echo "  make app-errors APP=name Describe KS/HR + warnings/events/pods for that app name."
 	@echo "  make reconcile-hr APP=name NS=namespace      flux reconcile helmrelease (needs flux CLI)."
 	@echo "  make reconcile-ks APP=name NS=namespace       flux reconcile kustomization."
 	@echo ""
 	@echo "Examples:"
 	@echo "  make monitor"
+	@echo "  make nfs-triage                 # or: make nfs-triage RECONCILE=1"
 	@echo "  make app-errors APP=gitlab"
 	@echo "  make reconcile-hr APP=gitlab NS=gitlab"
+
+nfs-triage:
+	@opts=""; [ "$(RECONCILE)" = "1" ] && opts="--reconcile" || true; \
+	bash "$(SCRIPTS)/flux-nfs-triage.sh" $$opts
 
 monitor:
 	@bash "$(SCRIPTS)/flux-monitor.sh"

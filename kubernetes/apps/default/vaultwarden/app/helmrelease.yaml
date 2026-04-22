@@ -31,26 +31,47 @@ spec:
               SHOW_PASSWORD_HINT: "false"
               SENDS_ALLOWED: "false"
               IP_HEADER: X-Forwarded-For
+              # Avoid defaulting to 1 worker per vCPU; excess workers waste RAM on a small limit.
+              ROCKET_WORKERS: "2"
               LOG_LEVEL: warn
               EXTENDED_LOGGING: "true"
               TZ: Etc/UTC
             probes:
-              liveness: &probes
+              # Startup must use custom httpGet — without it the chart uses tcpSocket on the port, which
+              # can "succeed" before Rocket serves /alive (SQLite on NFS is slow) and liveness then
+              # kills the container in a loop.
+              startup:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /alive
                     port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 120
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /alive
+                    port: *port
+                  initialDelaySeconds: 30
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 5
-              readiness: *probes
-              startup:
+              readiness:
                 enabled: true
+                custom: true
                 spec:
-                  failureThreshold: 30
-                  periodSeconds: 5
+                  httpGet:
+                    path: /alive
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -60,7 +81,7 @@ spec:
                 cpu: 50m
                 memory: 128Mi
               limits:
-                memory: 512Mi
+                memory: 1Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true

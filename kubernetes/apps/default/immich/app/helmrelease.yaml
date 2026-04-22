@@ -13,6 +13,7 @@ spec:
   postRenderers:
     - kustomize:
         patches:
+          # Replace whole strategy so chart-provided rollingUpdate is removed (Recreate + rollingUpdate is invalid)
           - patch: |-
               apiVersion: apps/v1
               kind: Deployment
@@ -20,6 +21,7 @@ spec:
                 name: immich-server
               spec:
                 strategy:
+                  $patch: replace
                   type: Recreate
           - patch: |-
               apiVersion: apps/v1
@@ -28,6 +30,7 @@ spec:
                 name: immich-machine-learning
               spec:
                 strategy:
+                  $patch: replace
                   type: Recreate
   values:
     immich:
