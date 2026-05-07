@@ -5,7 +5,7 @@ set -euo pipefail
 APP="${1:-}"
 if [[ -z "$APP" ]]; then
 	echo "Usage: $0 <name>" >&2
-	echo "  name = Flux Kustomization metadata.name (e.g. gitlab, gatus) or HelmRelease name." >&2
+	echo "  name = Flux Kustomization metadata.name (e.g. forgejo, gatus) or HelmRelease name." >&2
 	exit 1
 fi
 

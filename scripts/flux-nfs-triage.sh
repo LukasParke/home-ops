@@ -99,7 +99,7 @@ else
 fi
 
 # Drill into each namespace that has a triage set from the monitor; focus on not-Ready pods
-TRIAGE_NAMESPACES="default gitlab"
+TRIAGE_NAMESPACES="default forgejo"
 for NS in $TRIAGE_NAMESPACES; do
 	if ! kubectl get namespace "$NS" &>/dev/null; then
 		continue
@@ -140,8 +140,8 @@ if [[ "$RECONCILE" == true ]]; then
 	for K in ghostfolio home-assistant homepage immich lidarr prowlarr radarr sonarr tautulli termix vaultwarden; do
 		flux reconcile kustomization "$K" -n default --with-source || true
 	done
-	# gitlab
-	flux reconcile kustomization gitlab -n gitlab --with-source || true
+	# forgejo
+	flux reconcile kustomization forgejo -n forgejo --with-source || true
 	# gatus: not in csi dependsOn but often failed alongside these rollouts
 	flux reconcile kustomization gatus -n default --with-source || true
 	section "Done. Re-run: make monitor"

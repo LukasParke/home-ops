@@ -18,8 +18,8 @@ help:
 	@echo "Examples:"
 	@echo "  make monitor"
 	@echo "  make nfs-triage                 # or: make nfs-triage RECONCILE=1"
-	@echo "  make app-errors APP=gitlab"
-	@echo "  make reconcile-hr APP=gitlab NS=gitlab"
+	@echo "  make app-errors APP=forgejo"
+	@echo "  make reconcile-hr APP=forgejo NS=forgejo"
 
 nfs-triage:
 	@opts=""; [ "$(RECONCILE)" = "1" ] && opts="--reconcile" || true; \
@@ -33,7 +33,7 @@ monitor-watch:
 	@watch -n8 "$(MAKE)" -f "$(REPO_ROOT)/Makefile" monitor
 
 app-errors:
-	@if [ -z "$(APP)" ]; then echo "Set APP= (e.g. APP=gitlab)" >&2; exit 1; fi
+	@if [ -z "$(APP)" ]; then echo "Set APP= (e.g. APP=forgejo)" >&2; exit 1; fi
 	@bash "$(SCRIPTS)/flux-app-errors.sh" "$(APP)"
 
 reconcile-hr:

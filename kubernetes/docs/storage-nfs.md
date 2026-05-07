@@ -33,9 +33,9 @@ If you upgrade the Immich chart, re-check whether upstream removes the hardcoded
 
 ---
 
-## GitLab and CloudNativePG
+## Forgejo and CloudNativePG
 
-- **GitLab** ([`kubernetes/apps/gitlab/gitlab/app/helmrelease.yaml`](../apps/gitlab/gitlab/app/helmrelease.yaml)): Bitnami-style components use NFS `storageClass` where configured; many pieces are StatefulSets or subcharts — **not** the same `controllers.*.strategy` pattern. Follow inline comments in that file and upstream chart docs.
+- **Forgejo** ([`kubernetes/apps/forgejo/forgejo/app/helmrelease.yaml`](../apps/forgejo/forgejo/app/helmrelease.yaml)): uses the upstream **Forgejo Helm** chart with **Gateway API `HTTPRoute`**, **NFS** for repo data (`persistence`), and **CloudNativePG** for PostgreSQL ([`cluster-postgres.yaml`](../apps/forgejo/forgejo/app/cluster-postgres.yaml)) — not the app-template `controllers.*.strategy` pattern.
 - **CNPG `Cluster`** (e.g. [`kubernetes/apps/default/ghostfolio/app/cluster-postgres.yaml`](../apps/default/ghostfolio/app/cluster-postgres.yaml), Immich Postgres): storage class is set on the **Cluster** spec; rollout is handled by the operator — **do not** try to set Deployment `Recreate` here.
 
 ---
@@ -69,7 +69,7 @@ Those require **infra / CSI / NFS** troubleshooting first; Git-only changes cann
 
 ## Helm timeouts
 
-Slow NFS rollouts can exceed default Helm wait windows and trigger remediation rollbacks. Heavy charts (e.g. GitLab) may set explicit **`spec.timeout`** on **`HelmRelease`**; consider raising **`timeout`** on app-template releases if upgrades consistently hit timeouts **after** storage is healthy.
+Slow NFS rollouts can exceed default Helm wait windows and trigger remediation rollbacks. Heavy charts (e.g. Forgejo) may set explicit **`spec.timeout`** on **`HelmRelease`**; consider raising **`timeout`** on app-template releases if upgrades consistently hit timeouts **after** storage is healthy.
 
 ---
 
