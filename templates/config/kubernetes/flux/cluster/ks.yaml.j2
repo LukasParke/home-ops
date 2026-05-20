@@ -9,6 +9,7 @@ spec:
     provider: sops
   deletionPolicy: WaitForTermination
   interval: 1h
+  retryInterval: 5m
   path: ./kubernetes/apps
   prune: true
   sourceRef:
@@ -27,6 +28,7 @@ spec:
           decryption:
             provider: sops
           deletionPolicy: WaitForTermination
+          retryInterval: 5m
           patches:
             - patch: |-
                 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -34,6 +36,7 @@ spec:
                 metadata:
                   name: _
                 spec:
+                  timeout: 15m
                   install:
                     crds: CreateReplace
                     strategy:
@@ -48,7 +51,7 @@ spec:
                       name: RemediateOnFailure
                     remediation:
                       remediateLastFailure: true
-                      retries: 2
+                      retries: 5
               target:
                 group: helm.toolkit.fluxcd.io
                 kind: HelmRelease

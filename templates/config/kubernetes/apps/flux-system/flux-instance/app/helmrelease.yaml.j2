@@ -29,6 +29,7 @@ spec:
         #% endif %#
         ref: "refs/heads/#{ repository_branch }#"
         path: kubernetes/flux/cluster
+        interval: 15m
       commonMetadata:
         labels:
           app.kubernetes.io/name: flux
