@@ -55,6 +55,10 @@ Any workload that provisions **`nfs` CSI PVCs** should have its Flux **`Kustomiz
 
 ---
 
+## NAS subdirectory layout
+
+The `nfs` StorageClass uses `subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}` under export `/mnt/user/home-ops`. **The CSI driver does not create those paths on Unraid** — create `/<namespace>/<pvc-name>` on the NAS (e.g. `default/lidarr`) before new PVCs mount, or use a one-off mount/mkdir on the share.
+
 ## Operational symptoms (storage / CSI)
 
 When NFS or the CSI plugin is unhealthy, typical symptoms include:

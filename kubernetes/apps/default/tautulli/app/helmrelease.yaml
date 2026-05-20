@@ -47,9 +47,7 @@ spec:
                 memory: 512Mi
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
+        runAsNonRoot: false
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
@@ -76,6 +74,10 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      run:
+        type: emptyDir
+        globalMounts:
+          - path: /run
       config:
         enabled: true
         type: persistentVolumeClaim
