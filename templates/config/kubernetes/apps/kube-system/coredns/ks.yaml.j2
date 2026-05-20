@@ -6,7 +6,7 @@ metadata:
 spec:
   dependsOn:
     - name: cilium
-      namespace: flux-system
+      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/kube-system/coredns/app
   postBuild:
