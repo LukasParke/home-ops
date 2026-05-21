@@ -72,8 +72,6 @@ spec:
           gethomepage.dev/group: Home
           gethomepage.dev/icon: homeassistant.png
           gethomepage.dev/href: "https://homeassistant.${SECRET_DOMAIN}"
-          gethomepage.dev/widget.type: homeassistant
-          gethomepage.dev/widget.url: "https://homeassistant.${SECRET_DOMAIN}"
         hostnames: ["homeassistant.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external

@@ -90,12 +90,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: Ghostfolio
-          gethomepage.dev/description: Portfolio tracker
-          gethomepage.dev/group: Apps
-          gethomepage.dev/icon: ghostfolio.png
-          gethomepage.dev/href: "https://ghostfolio.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "false"
         hostnames: ["ghostfolio.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external

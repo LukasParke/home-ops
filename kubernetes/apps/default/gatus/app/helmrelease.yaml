@@ -87,12 +87,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: Gatus
-          gethomepage.dev/description: Service health dashboard
-          gethomepage.dev/group: Observability
-          gethomepage.dev/icon: mdi-heart-pulse
-          gethomepage.dev/href: "https://gatus.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "false"
         hostnames: ["gatus.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external

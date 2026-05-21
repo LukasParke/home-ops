@@ -73,7 +73,39 @@ spec:
                       accountid: ${CLOUDFLARE_ACCOUNT_ID}
                       tunnelid: ${CLOUDFLARE_TUNNEL_ID}
                       key: ${CLOUDFLARE_TUNNEL_API_TOKEN}
-            - Cluster apps:
+            - Media:
+                - Prowlarr:
+                    icon: prowlarr.png
+                    href: https://prowlarr.${SECRET_DOMAIN}
+                    description: Indexer manager
+                    widget:
+                      type: prowlarr
+                      url: https://prowlarr.${SECRET_DOMAIN}
+                      key: ${PROWLARR__AUTH__APIKEY}
+                - Radarr:
+                    icon: radarr.png
+                    href: https://radarr.${SECRET_DOMAIN}
+                    description: Movies
+                    widget:
+                      type: radarr
+                      url: https://radarr.${SECRET_DOMAIN}
+                      key: ${RADARR__AUTH__APIKEY}
+                - Sonarr:
+                    icon: sonarr.png
+                    href: https://sonarr.${SECRET_DOMAIN}
+                    description: TV
+                    widget:
+                      type: sonarr
+                      url: https://sonarr.${SECRET_DOMAIN}
+                      key: ${SONARR__AUTH__APIKEY}
+                - Lidarr:
+                    icon: lidarr.png
+                    href: https://lidarr.${SECRET_DOMAIN}
+                    description: Music
+                    widget:
+                      type: lidarr
+                      url: https://lidarr.${SECRET_DOMAIN}
+                      key: ${LIDARR__AUTH__APIKEY}
                 - Tautulli:
                     icon: tautulli.png
                     href: https://tautulli.${SECRET_DOMAIN}
@@ -82,13 +114,16 @@ spec:
                       type: tautulli
                       url: https://tautulli.${SECRET_DOMAIN}
                       key: ${TAUTULLI_API_KEY}
-                - Gatus:
-                    icon: mdi-monitor-dashboard
-                    href: https://gatus.${SECRET_DOMAIN}
-                    description: Status checks
+                - Immich:
+                    icon: immich.png
+                    href: https://immich.${SECRET_DOMAIN}
+                    description: Photo library
                     widget:
-                      type: gatus
-                      url: https://gatus.${SECRET_DOMAIN}
+                      type: immich
+                      url: https://immich.${SECRET_DOMAIN}
+                      key: ${IMMICH_API_KEY}
+                      version: 2
+            - Apps:
                 - Ghostfolio:
                     icon: ghostfolio.png
                     href: https://ghostfolio.${SECRET_DOMAIN}
@@ -97,6 +132,28 @@ spec:
                       type: ghostfolio
                       url: https://ghostfolio.${SECRET_DOMAIN}
                       key: ${GHOSTFOLIO_WIDGET_BEARER_TOKEN}
+                - Gatus:
+                    icon: mdi-heart-pulse
+                    href: https://gatus.${SECRET_DOMAIN}
+                    description: Status checks
+                    widget:
+                      type: gatus
+                      url: https://gatus.${SECRET_DOMAIN}
+                - Grafana:
+                    icon: grafana.png
+                    href: https://grafana.${SECRET_DOMAIN}
+                    description: Metrics and dashboards
+                    widget:
+                      type: grafana
+                      version: 2
+                      url: https://grafana.${SECRET_DOMAIN}
+                      username: ${GRAFANA_USERNAME}
+                      password: ${GRAFANA_PASSWORD}
+            - Git:
+                - Forgejo:
+                    icon: forgejo.png
+                    href: https://forgejo.${SECRET_DOMAIN}
+                    description: Git hosting
     controllers:
       homepage:
         strategy: Recreate

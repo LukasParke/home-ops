@@ -52,14 +52,7 @@ spec:
       route:
         main:
           annotations:
-            gethomepage.dev/enabled: "true"
-            gethomepage.dev/name: Immich
-            gethomepage.dev/description: Photo library
-            gethomepage.dev/group: Photos
-            gethomepage.dev/icon: immich.png
-            gethomepage.dev/href: "https://immich.${SECRET_DOMAIN}"
-            gethomepage.dev/widget.type: immich
-            gethomepage.dev/widget.url: "https://immich.${SECRET_DOMAIN}"
+            gethomepage.dev/enabled: "false"
           hostnames:
             - "immich.${SECRET_DOMAIN}"
           parentRefs:
