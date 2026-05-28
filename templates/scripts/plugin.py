@@ -48,6 +48,25 @@ def age_key(key_type: str, file_path: str = 'age.key') -> str:
 
 
 # Return cloudflare tunnel fields from cloudflare-tunnel.json
+def cloudflare_account_tag(file_path: str = 'cloudflare-tunnel.json') -> str:
+    try:
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        account_tag = data.get("AccountTag")
+        if account_tag is None:
+            raise KeyError(f"Missing 'AccountTag' key in {file_path}")
+        return account_tag
+
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {file_path}")
+    except json.JSONDecodeError:
+        raise ValueError(f"Could not decode JSON file: {file_path}")
+    except KeyError as e:
+        raise KeyError(f"Error in JSON structure: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error while processing {file_path}: {e}")
+
+
 def cloudflare_tunnel_id(file_path: str = 'cloudflare-tunnel.json') -> str:
     try:
         with open(file_path, 'r') as file:
@@ -160,6 +179,7 @@ class Plugin(makejinja.plugin.Plugin):
     def functions(self) -> makejinja.plugin.Functions:
         return [
             age_key,
+            cloudflare_account_tag,
             cloudflare_tunnel_id,
             cloudflare_tunnel_secret,
             github_deploy_key,

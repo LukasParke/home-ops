@@ -11,8 +11,15 @@ parameters:
   # You can use template variables like: server: "#{ nfs_server }#"
   server: "#{ nfs_server | default('YOUR_NFS_SERVER_IP_OR_HOSTNAME') }#"
   share: "#{ nfs_share | default('/path/to/nfs/share') }#"
-  mountOptions: "nfsvers=4.1,proto=tcp"
+  # NAS layout: <namespace>/<pvc-name>. SC parameters are immutable; recreate SC after removing PVCs.
+  subDir: "${pvc.metadata.namespace}/${pvc.metadata.name}"
+mountOptions:
+  - nfsvers=4.1
+  - proto=tcp
+  - hard
+  - timeo=600
+  - retrans=2
+  - noresvport
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
 reclaimPolicy: Retain
-

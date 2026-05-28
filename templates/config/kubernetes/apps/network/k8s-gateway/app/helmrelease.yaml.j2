@@ -11,7 +11,15 @@ spec:
   values:
     fullnameOverride: k8s-gateway
     domain: "${SECRET_DOMAIN}"
+    replicaCount: 2
     ttl: 1
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: k8s-gateway
     service:
       type: LoadBalancer
       port: 53

@@ -61,7 +61,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
+          gethomepage.dev/enabled: "false"
           gethomepage.dev/name: Echo
           gethomepage.dev/description: HTTP debug echo service
           gethomepage.dev/group: Tools

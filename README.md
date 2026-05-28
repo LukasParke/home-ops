@@ -24,7 +24,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - Dependency automation w/ [Renovate](https://www.mend.io/renovate)
 - Flux `HelmRelease` and `Kustomization` diffs w/ [flux-local](https://github.com/allenporter/flux-local)
 
-**Kubernetes (this repo):** NFS CSI, ReadWriteOnce volumes, and when to use Deployment `Recreate` are documented in [kubernetes/docs/storage-nfs.md](./kubernetes/docs/storage-nfs.md).
+**Kubernetes (this repo):** NFS CSI, ReadWriteOnce volumes, and when to use Deployment `Recreate` are documented in [kubernetes/docs/storage-nfs.md](./kubernetes/docs/storage-nfs.md). Homepage inventory and widget conventions are documented in [kubernetes/docs/homepage.md](./kubernetes/docs/homepage.md).
 
 Does this sound cool to you? If so, continue to read on! 👇
 

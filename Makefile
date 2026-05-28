@@ -4,13 +4,15 @@ SCRIPTS := $(REPO_ROOT)/scripts
 
 .DEFAULT_GOAL := help
 
-.PHONY: help monitor monitor-watch app-errors reconcile reconcile-hr reconcile-ks nfs-triage
+.PHONY: help monitor monitor-watch app-errors reconcile reconcile-hr reconcile-ks nfs-triage nfs-probe nfs-patch-pvs
 
 help:
 	@echo "Targets:"
 	@echo "  make monitor              Flux KS/HR health, Git source; groups identical error lines to find one root cause."
 	@echo "  make monitor-watch       Same as monitor every 8s (needs watch(1))."
 	@echo "  make nfs-triage          CSI NFS + not-Ready HRs + PVC pods (add RECONCILE=1 to also flux reconcile)."
+	@echo "  make nfs-probe           Temporary DaemonSet probe: verifies every node can mount/write the NFS export."
+	@echo "  make nfs-patch-pvs       Patch existing NFS PV mountOptions (set DRY_RUN=none to apply; default server dry-run)."
 	@echo "  make app-errors APP=name Describe KS/HR + warnings/events/pods for that app name."
 	@echo "  make reconcile                              Pull git + reconcile cluster-apps (full app tree)."
 	@echo "  make reconcile-hr APP=name NS=namespace      flux reconcile helmrelease (needs flux CLI)."
@@ -20,12 +22,20 @@ help:
 	@echo "  make reconcile"
 	@echo "  make monitor"
 	@echo "  make nfs-triage                 # or: make nfs-triage RECONCILE=1"
+	@echo "  make nfs-probe"
+	@echo "  make nfs-patch-pvs              # or: make nfs-patch-pvs DRY_RUN=none"
 	@echo "  make app-errors APP=forgejo"
 	@echo "  make reconcile-hr APP=forgejo NS=forgejo"
 
 nfs-triage:
 	@opts=""; [ "$(RECONCILE)" = "1" ] && opts="--reconcile" || true; \
 	bash "$(SCRIPTS)/flux-nfs-triage.sh" $$opts
+
+nfs-probe:
+	@bash "$(SCRIPTS)/nfs-node-probe.sh"
+
+nfs-patch-pvs:
+	@DRY_RUN="$(or $(DRY_RUN),server)" PHASE_SELECTOR="$(or $(PHASE_SELECTOR),all)" bash "$(SCRIPTS)/patch-nfs-pv-mount-options.sh"
 
 monitor:
 	@bash "$(SCRIPTS)/flux-monitor.sh"

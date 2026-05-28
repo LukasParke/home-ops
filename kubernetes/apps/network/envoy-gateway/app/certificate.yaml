@@ -7,7 +7,8 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
-  duration: 160h
+  duration: 2160h
+  renewBefore: 720h
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer

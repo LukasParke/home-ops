@@ -47,7 +47,7 @@ echo "=== percy restore TS=${{TS}} ==="
 echo "=== mount NFS ==="
 sut mkdir -p /mnt/home-ops
 if ! mountpoint -q /mnt/home-ops; then
-  sut mount -t nfs -o vers=3,nolock,soft,timeo=600 10.10.10.215:/mnt/user/home-ops /mnt/home-ops
+  sut mount -t nfs -o vers=4.1,proto=tcp,hard,timeo=600,retrans=2,noresvport 10.10.10.215:/mnt/user/home-ops /mnt/home-ops
 fi
 mount | grep /mnt/home-ops || true
 ls /mnt/home-ops/default/home-assistant /mnt/home-ops/default/vaultwarden

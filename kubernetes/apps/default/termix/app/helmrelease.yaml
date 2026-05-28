@@ -64,7 +64,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
+          gethomepage.dev/enabled: "false"
           gethomepage.dev/name: Termix
           gethomepage.dev/description: Web terminal
           gethomepage.dev/group: Tools

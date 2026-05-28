@@ -13,25 +13,26 @@ spec:
   postRenderers:
     - kustomize:
         patches:
-          # Replace whole strategy so chart-provided rollingUpdate is removed (Recreate + rollingUpdate is invalid)
           - patch: |-
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                name: immich-server
-              spec:
-                strategy:
-                  $patch: replace
+              - op: replace
+                path: /spec/strategy
+                value:
                   type: Recreate
+            target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: immich-server
           - patch: |-
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                name: immich-machine-learning
-              spec:
-                strategy:
-                  $patch: replace
+              - op: replace
+                path: /spec/strategy
+                value:
                   type: Recreate
+            target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: immich-machine-learning
   values:
     immich:
       metrics:
@@ -76,9 +77,9 @@ spec:
               resources:
                 requests:
                   cpu: 250m
-                  memory: 512Mi
+                  memory: 1Gi
                 limits:
-                  memory: 2Gi
+                  memory: 4Gi
     machine-learning:
       enabled: true
       persistence:

@@ -11,7 +11,13 @@ spec:
   values:
     controllers:
       cloudflare-tunnel:
+        replicas: 2
         strategy: RollingUpdate
+        rollingUpdate:
+          surge: 1
+          unavailable: 1
+        podDisruptionBudget:
+          minAvailable: 1
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -51,6 +57,13 @@ spec:
               limits:
                 memory: 256Mi
     defaultPodOptions:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/controller: cloudflare-tunnel
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534

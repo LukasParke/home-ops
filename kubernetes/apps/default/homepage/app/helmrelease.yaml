@@ -16,8 +16,8 @@ spec:
         data:
           kubernetes.yaml: |
             mode: cluster
-            ingress: true
-            gateway: true
+            ingress: false
+            gateway: false
       widgets:
         enabled: true
         data:
@@ -43,117 +43,176 @@ spec:
                     icon: unraid.png
                     href: ${UNRAID_URL}
                     description: NAS / hypervisor
-                    widget:
-                      type: unraid
-                      url: ${UNRAID_URL}
-                      key: ${UNRAID_API_KEY}
-                - qBittorrent:
-                    icon: qbittorrent.png
-                    href: ${QBITTORRENT_URL}
-                    description: Torrent client
-                    widget:
-                      type: qbittorrent
-                      url: ${QBITTORRENT_URL}
-                      username: ${QBITTORRENT_USERNAME}
-                      password: ${QBITTORRENT_PASSWORD}
-                - Plex:
-                    icon: plex.png
-                    href: ${PLEX_URL}
-                    description: Media server
-                    widget:
-                      type: plex
-                      url: ${PLEX_URL}
-                      key: ${PLEX_TOKEN}
                 - Cloudflare Tunnel:
                     icon: cloudflare.png
                     href: https://one.dash.cloudflare.com/${CLOUDFLARE_ACCOUNT_ID}
                     description: Tunnel status
+                    namespace: network
+                    app: cloudflare-tunnel
                     widget:
                       type: cloudflared
                       accountid: ${CLOUDFLARE_ACCOUNT_ID}
                       tunnelid: ${CLOUDFLARE_TUNNEL_ID}
                       key: ${CLOUDFLARE_TUNNEL_API_TOKEN}
+            - Cluster:
+                - Homepage:
+                    icon: homepage.png
+                    href: https://homepage.${SECRET_DOMAIN}
+                    description: Application dashboard
+                    namespace: default
+                    app: homepage
+            - Network:
+                - Envoy Gateway:
+                    icon: envoy.png
+                    description: Gateway API controller
+                    namespace: network
+                    app: gateway-helm
+                - k8s Gateway:
+                    icon: coredns.png
+                    description: Split DNS responder
+                    namespace: network
+                    app: k8s-gateway
+                - Cloudflare DNS:
+                    icon: cloudflare.png
+                    description: Public DNS reconciler
+                    namespace: network
+                    podSelector: app.kubernetes.io/instance=cloudflare-dns
+                - UniFi DNS:
+                    icon: unifi.png
+                    description: Internal DNS reconciler
+                    namespace: network
+                    podSelector: app.kubernetes.io/instance=unifi-dns
             - Media:
                 - Prowlarr:
                     icon: prowlarr.png
                     href: https://prowlarr.${SECRET_DOMAIN}
                     description: Indexer manager
+                    namespace: default
+                    app: prowlarr
                     widget:
                       type: prowlarr
-                      url: https://prowlarr.${SECRET_DOMAIN}
+                      url: http://prowlarr.default.svc.cluster.local
                       key: ${PROWLARR__AUTH__APIKEY}
                 - Radarr:
                     icon: radarr.png
                     href: https://radarr.${SECRET_DOMAIN}
                     description: Movies
+                    namespace: default
+                    app: radarr
                     widget:
                       type: radarr
-                      url: https://radarr.${SECRET_DOMAIN}
+                      url: http://radarr.default.svc.cluster.local
                       key: ${RADARR__AUTH__APIKEY}
                 - Sonarr:
                     icon: sonarr.png
                     href: https://sonarr.${SECRET_DOMAIN}
                     description: TV
+                    namespace: default
+                    app: sonarr
                     widget:
                       type: sonarr
-                      url: https://sonarr.${SECRET_DOMAIN}
+                      url: http://sonarr.default.svc.cluster.local
                       key: ${SONARR__AUTH__APIKEY}
                 - Lidarr:
                     icon: lidarr.png
                     href: https://lidarr.${SECRET_DOMAIN}
                     description: Music
+                    namespace: default
+                    app: lidarr
                     widget:
                       type: lidarr
-                      url: https://lidarr.${SECRET_DOMAIN}
+                      url: http://lidarr.default.svc.cluster.local
                       key: ${LIDARR__AUTH__APIKEY}
                 - Tautulli:
                     icon: tautulli.png
                     href: https://tautulli.${SECRET_DOMAIN}
                     description: Plex analytics
+                    namespace: default
+                    app: tautulli
                     widget:
                       type: tautulli
-                      url: https://tautulli.${SECRET_DOMAIN}
+                      url: http://tautulli.default.svc.cluster.local:8181
                       key: ${TAUTULLI_API_KEY}
                 - Immich:
                     icon: immich.png
                     href: https://immich.${SECRET_DOMAIN}
                     description: Photo library
+                    namespace: default
+                    podSelector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
                     widget:
                       type: immich
-                      url: https://immich.${SECRET_DOMAIN}
+                      url: http://immich-server.default.svc.cluster.local:2283
                       key: ${IMMICH_API_KEY}
                       version: 2
             - Apps:
+                - Home Assistant:
+                    icon: homeassistant.png
+                    href: https://homeassistant.${SECRET_DOMAIN}
+                    description: Home automation hub
+                    namespace: default
+                    app: home-assistant
+                - Vaultwarden:
+                    icon: vaultwarden.png
+                    href: https://vault.${SECRET_DOMAIN}
+                    description: Password manager
+                    namespace: default
+                    app: vaultwarden
+                    widget:
+                      type: vaultwarden
+                      url: http://vaultwarden.default.svc.cluster.local:8080
                 - Ghostfolio:
                     icon: ghostfolio.png
                     href: https://ghostfolio.${SECRET_DOMAIN}
                     description: Portfolio tracker
-                    widget:
-                      type: ghostfolio
-                      url: https://ghostfolio.${SECRET_DOMAIN}
-                      key: ${GHOSTFOLIO_WIDGET_BEARER_TOKEN}
+                    namespace: default
+                    app: ghostfolio
                 - Gatus:
                     icon: mdi-heart-pulse
                     href: https://gatus.${SECRET_DOMAIN}
                     description: Status checks
+                    namespace: default
+                    app: gatus
                     widget:
                       type: gatus
-                      url: https://gatus.${SECRET_DOMAIN}
+                      url: http://gatus.default.svc.cluster.local:8080
+                - Termix:
+                    icon: mdi-console
+                    href: https://termix.${SECRET_DOMAIN}
+                    description: Web terminal
+                    namespace: default
+                    app: termix
+            - Observability:
                 - Grafana:
                     icon: grafana.png
                     href: https://grafana.${SECRET_DOMAIN}
                     description: Metrics and dashboards
+                    namespace: observability
+                    app: grafana
                     widget:
                       type: grafana
                       version: 2
-                      url: https://grafana.${SECRET_DOMAIN}
+                      url: http://kube-prometheus-stack-grafana.observability.svc.cluster.local
                       username: ${GRAFANA_USERNAME}
                       password: ${GRAFANA_PASSWORD}
+                - Prometheus:
+                    icon: prometheus.png
+                    description: Metrics storage
+                    namespace: observability
+                    app: prometheus
+            - Tools:
+                - Echo:
+                    icon: mdi-server-network
+                    href: https://echo.${SECRET_DOMAIN}
+                    description: HTTP debug echo service
+                    namespace: default
+                    app: echo
             - Git:
                 - Forgejo:
                     icon: forgejo.png
                     href: https://forgejo.${SECRET_DOMAIN}
                     description: Git hosting
+                    namespace: forgejo
+                    app: forgejo
     controllers:
       homepage:
         strategy: Recreate
@@ -163,9 +222,9 @@ spec:
           app:
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v1.12.3
+              tag: v1.13.1
             env:
-              HOMEPAGE_ALLOWED_HOSTS: "homepage.${SECRET_DOMAIN}"
+              HOMEPAGE_ALLOWED_HOSTS: "homepage.${SECRET_DOMAIN},homepage.default.svc.cluster.local,homepage.default.svc,homepage"
             probes:
               liveness: &probes
                 enabled: true
@@ -230,7 +289,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
+          gethomepage.dev/enabled: "false"
           gethomepage.dev/name: Homepage
           gethomepage.dev/description: Application dashboard
           gethomepage.dev/group: Cluster

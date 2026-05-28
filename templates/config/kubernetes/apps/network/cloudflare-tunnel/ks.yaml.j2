@@ -4,6 +4,11 @@ kind: Kustomization
 metadata:
   name: cloudflare-tunnel
 spec:
+  dependsOn:
+    - name: cloudflare-dns
+      namespace: network
+    - name: envoy-gateway
+      namespace: network
   interval: 1h
   path: ./kubernetes/apps/network/cloudflare-tunnel/app
   postBuild:
@@ -16,4 +21,4 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: network
-  wait: false
+  wait: true

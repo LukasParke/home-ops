@@ -59,6 +59,40 @@ Any workload that provisions **`nfs` CSI PVCs** should have its Flux **`Kustomiz
 
 The `nfs` StorageClass uses `subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}` under export `/mnt/user/home-ops`. **The CSI driver does not create those paths on Unraid** — create `/<namespace>/<pvc-name>` on the NAS (e.g. `default/lidarr`) before new PVCs mount, or use a one-off mount/mkdir on the share.
 
+## Mount behavior
+
+The `nfs` StorageClass explicitly uses NFSv4.1 over TCP with hard mounts and
+`noresvport`. That favors data correctness and clean reconnect behavior across
+NAS restarts, node reboots, and transient network failures. Avoid `soft` mounts
+for application data; they can surface partial I/O failures to databases and
+stateful apps.
+
+StorageClass mount options are copied to new PVs when they are provisioned.
+Existing PVs keep the mount options they were created with; inspect them with:
+
+```sh
+kubectl get pv -o jsonpath='{range .items[?(@.spec.storageClassName=="nfs")]}{.metadata.name}{"\t"}{.spec.claimRef.namespace}/{.spec.claimRef.name}{"\t"}{.spec.mountOptions}{"\n"}{end}'
+```
+
+Patch bound NFS PVs after changing StorageClass mount options:
+
+```sh
+DRY_RUN=server scripts/patch-nfs-pv-mount-options.sh
+DRY_RUN=none scripts/patch-nfs-pv-mount-options.sh
+```
+
+Patched options are used on the next mount. Existing running Pods keep their
+current node mount until they restart or move.
+
+Verify all Talos nodes can mount the same NFS export:
+
+```sh
+scripts/nfs-node-probe.sh
+```
+
+The probe creates a temporary DaemonSet, writes and removes one hidden marker
+file per node on the NFS export, prints per-node logs, and then removes itself.
+
 ## Operational symptoms (storage / CSI)
 
 When NFS or the CSI plugin is unhealthy, typical symptoms include:
