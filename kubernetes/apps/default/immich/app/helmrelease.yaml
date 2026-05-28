@@ -8,31 +8,6 @@ spec:
     kind: OCIRepository
     name: immich
   interval: 1h
-  # Chart templates merge hardcoded server/machine-learning strategy RollingUpdate after user values,
-  # so Recreate must be applied via post-render for RWO NFS volumes (library + ML cache).
-  postRenderers:
-    - kustomize:
-        patches:
-          - patch: |-
-              - op: replace
-                path: /spec/strategy
-                value:
-                  type: Recreate
-            target:
-              group: apps
-              version: v1
-              kind: Deployment
-              name: immich-server
-          - patch: |-
-              - op: replace
-                path: /spec/strategy
-                value:
-                  type: Recreate
-            target:
-              group: apps
-              version: v1
-              kind: Deployment
-              name: immich-machine-learning
   values:
     immich:
       metrics:
@@ -66,6 +41,7 @@ spec:
                   port: http
       controllers:
         main:
+          strategy: Recreate
           containers:
             main:
               env:
@@ -82,6 +58,9 @@ spec:
                   memory: 4Gi
     machine-learning:
       enabled: true
+      controllers:
+        main:
+          strategy: Recreate
       persistence:
         cache:
           enabled: true
