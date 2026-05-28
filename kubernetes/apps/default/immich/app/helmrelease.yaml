@@ -12,6 +12,7 @@ spec:
   # existing Deployments to Recreate; force lets the live objects converge.
   upgrade:
     force: true
+    serverSideApply: disabled
   values:
     immich:
       metrics:
