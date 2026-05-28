@@ -21,7 +21,6 @@ the external gateway has a temporary outage.
 
 | Service | Widget | Internal URL/credentials |
 | --- | --- | --- |
-| Cloudflare Tunnel | `cloudflared` | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_TUNNEL_ID`, `CLOUDFLARE_TUNNEL_API_TOKEN` |
 | Prowlarr | `prowlarr` | `PROWLARR__AUTH__APIKEY` |
 | Radarr | `radarr` | `RADARR__AUTH__APIKEY` |
 | Sonarr | `sonarr` | `SONARR__AUTH__APIKEY` |
@@ -34,10 +33,10 @@ the external gateway has a temporary outage.
 
 ## Optional widgets
 
-Unraid, qBittorrent, Plex, Forgejo, Home Assistant, and Ghostfolio are listed as
-links/status entries only unless valid widget credentials are added. Do not add
-widgets with empty or expired credentials; Homepage will proxy those requests and
-log repeated widget errors.
+Unraid, qBittorrent, Plex, Cloudflare Tunnel, Forgejo, Home Assistant, and
+Ghostfolio are listed as links/status entries only unless valid widget
+credentials are added. Do not add widgets with empty, expired, or under-scoped
+credentials; Homepage will proxy those requests and log repeated widget errors.
 
 Ghostfolio bearer tokens expire after six months. From an in-cluster debug pod,
 generate a fresh bearer token from the account security token before re-enabling

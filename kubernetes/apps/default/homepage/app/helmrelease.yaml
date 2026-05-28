@@ -49,11 +49,6 @@ spec:
                     description: Tunnel status
                     namespace: network
                     app: cloudflare-tunnel
-                    widget:
-                      type: cloudflared
-                      accountid: ${CLOUDFLARE_ACCOUNT_ID}
-                      tunnelid: ${CLOUDFLARE_TUNNEL_ID}
-                      key: ${CLOUDFLARE_TUNNEL_API_TOKEN}
             - Cluster:
                 - Homepage:
                     icon: homepage.png
@@ -138,6 +133,7 @@ spec:
                     href: https://immich.${SECRET_DOMAIN}
                     description: Photo library
                     namespace: default
+                    app: server
                     podSelector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
                     widget:
                       type: immich
