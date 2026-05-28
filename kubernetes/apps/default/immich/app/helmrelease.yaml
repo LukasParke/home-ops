@@ -8,11 +8,6 @@ spec:
     kind: OCIRepository
     name: immich
   interval: 1h
-  # Helm's normal patch path leaves the old rollingUpdate field when switching
-  # existing Deployments to Recreate; force lets the live objects converge.
-  upgrade:
-    force: true
-    serverSideApply: disabled
   values:
     immich:
       metrics:
