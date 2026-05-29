@@ -58,7 +58,7 @@ spec:
                     app: homepage
             - Network:
                 - Envoy Gateway:
-                    icon: envoy.png
+                    icon: si-envoyproxy
                     description: Gateway API controller
                     namespace: network
                     app: gateway-helm
@@ -142,7 +142,7 @@ spec:
                       version: 2
             - Apps:
                 - Home Assistant:
-                    icon: homeassistant.png
+                    icon: home-assistant.png
                     href: https://homeassistant.${SECRET_DOMAIN}
                     description: Home automation hub
                     namespace: default

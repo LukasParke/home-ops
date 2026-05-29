@@ -70,7 +70,7 @@ spec:
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/description: Home automation hub
           gethomepage.dev/group: Home
-          gethomepage.dev/icon: homeassistant.png
+          gethomepage.dev/icon: home-assistant.png
           gethomepage.dev/href: "https://homeassistant.${SECRET_DOMAIN}"
         hostnames: ["homeassistant.${SECRET_DOMAIN}"]
         parentRefs:

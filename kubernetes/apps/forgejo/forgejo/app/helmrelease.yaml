@@ -34,7 +34,7 @@ spec:
         username: "${FORGEJO_ADMIN_USERNAME}"
         password: "${FORGEJO_ADMIN_PASSWORD}"
         email: "${FORGEJO_ADMIN_EMAIL}"
-        passwordMode: initialOnlyRequireReset
+        passwordMode: keepUpdated
       additionalConfigFromEnvs:
         - name: FORGEJO__DATABASE__PASSWD
           valueFrom:

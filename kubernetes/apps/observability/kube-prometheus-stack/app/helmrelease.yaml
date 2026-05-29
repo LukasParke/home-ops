@@ -49,6 +49,8 @@ spec:
             memory: 256Mi
     grafana:
       enabled: true
+      adminUser: "${GRAFANA_USERNAME}"
+      adminPassword: "${GRAFANA_PASSWORD}"
       ingress:
         enabled: false
       sidecar:
