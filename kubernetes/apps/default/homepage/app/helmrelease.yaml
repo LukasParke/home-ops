@@ -153,9 +153,6 @@ spec:
                     description: Password manager
                     namespace: default
                     app: vaultwarden
-                    widget:
-                      type: vaultwarden
-                      url: http://vaultwarden.default.svc.cluster.local:8080
                 - Ghostfolio:
                     icon: ghostfolio.png
                     href: https://ghostfolio.${SECRET_DOMAIN}
