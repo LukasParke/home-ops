@@ -39,6 +39,26 @@ spec:
         serviceMonitorSelectorNilUsesHelmValues: false
     alertmanager:
       enabled: true
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          receiver: discord
+          group_by: ["alertname", "job"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+          routes:
+            - match:
+                alertname: Watchdog
+              receiver: "null"
+        receivers:
+          - name: "null"
+          - name: discord
+            discord_configs:
+              - webhook_url: "${DISCORD_WEBHOOK_URL}"
+                title: '{{ template "default.title" . }}'
+                message: '{{ template "default.message" . }}'
       alertmanagerSpec:
         replicas: 1
         resources:
