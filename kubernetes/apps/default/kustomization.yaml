@@ -22,3 +22,4 @@ resources:
   - ./immich/ks.yaml
   - ./termix-guacd/ks.yaml
   - ./termix/ks.yaml
+  - ./firecrawl/ks.yaml

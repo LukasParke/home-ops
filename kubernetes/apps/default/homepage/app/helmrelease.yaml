@@ -43,40 +43,28 @@ spec:
                     icon: unraid.png
                     href: ${UNRAID_URL}
                     description: NAS / hypervisor
-                - Cloudflare Tunnel:
-                    icon: cloudflare.png
-                    href: https://one.dash.cloudflare.com/${CLOUDFLARE_ACCOUNT_ID}
-                    description: Tunnel status
-                    namespace: network
-                    app: cloudflare-tunnel
-            - Cluster:
-                - Homepage:
-                    icon: homepage.png
-                    href: https://homepage.${SECRET_DOMAIN}
-                    description: Application dashboard
+            - Home & Personal:
+                - Home Assistant:
+                    icon: home-assistant.png
+                    href: https://homeassistant.${SECRET_DOMAIN}
+                    description: Home automation hub
                     namespace: default
-                    app: homepage
-            - Network:
-                - Envoy Gateway:
-                    icon: si-envoyproxy
-                    description: Gateway API controller
-                    namespace: network
-                    app: gateway-helm
-                - k8s Gateway:
-                    icon: coredns.png
-                    description: Split DNS responder
-                    namespace: network
-                    app: k8s-gateway
-                - Cloudflare DNS:
-                    icon: cloudflare.png
-                    description: Public DNS reconciler
-                    namespace: network
-                    podSelector: app.kubernetes.io/instance=cloudflare-dns
-                - UniFi DNS:
-                    icon: unifi.png
-                    description: Internal DNS reconciler
-                    namespace: network
-                    podSelector: app.kubernetes.io/instance=unifi-dns
+                    app: home-assistant
+                - Vaultwarden:
+                    icon: vaultwarden.png
+                    href: https://vault.${SECRET_DOMAIN}
+                    description: Password manager
+                    namespace: default
+                    app: vaultwarden
+                    widget:
+                      type: vaultwarden
+                      url: http://vaultwarden.default.svc.cluster.local:8080
+                - Ghostfolio:
+                    icon: ghostfolio.png
+                    href: https://ghostfolio.${SECRET_DOMAIN}
+                    description: Portfolio tracker
+                    namespace: default
+                    app: ghostfolio
             - Media:
                 - Prowlarr:
                     icon: prowlarr.png
@@ -133,47 +121,44 @@ spec:
                     href: https://immich.${SECRET_DOMAIN}
                     description: Photo library
                     namespace: default
-                    app: server
                     podSelector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
                     widget:
                       type: immich
                       url: http://immich-server.default.svc.cluster.local:2283
                       key: ${IMMICH_API_KEY}
                       version: 2
-            - Apps:
-                - Home Assistant:
-                    icon: home-assistant.png
-                    href: https://homeassistant.${SECRET_DOMAIN}
-                    description: Home automation hub
-                    namespace: default
-                    app: home-assistant
-                - Vaultwarden:
-                    icon: vaultwarden.png
-                    href: https://vault.${SECRET_DOMAIN}
-                    description: Password manager
-                    namespace: default
-                    app: vaultwarden
-                - Ghostfolio:
-                    icon: ghostfolio.png
-                    href: https://ghostfolio.${SECRET_DOMAIN}
-                    description: Portfolio tracker
-                    namespace: default
-                    app: ghostfolio
-                - Gatus:
-                    icon: mdi-heart-pulse
-                    href: https://gatus.${SECRET_DOMAIN}
-                    description: Status checks
-                    namespace: default
-                    app: gatus
-                    widget:
-                      type: gatus
-                      url: http://gatus.default.svc.cluster.local:8080
-                - Termix:
-                    icon: mdi-console
-                    href: https://termix.${SECRET_DOMAIN}
-                    description: Web terminal
-                    namespace: default
-                    app: termix
+            - Network:
+                - Envoy Gateway:
+                    icon: si-envoyproxy
+                    description: Gateway API controller
+                    namespace: network
+                    app: gateway-helm
+                - k8s Gateway:
+                    icon: coredns.png
+                    description: Split DNS responder
+                    namespace: network
+                    app: k8s-gateway
+                - Cloudflare Tunnel:
+                    icon: cloudflare.png
+                    href: https://one.dash.cloudflare.com/${CLOUDFLARE_ACCOUNT_ID}/networks/tunnels
+                    description: Tunnel status
+                    namespace: network
+                    app: cloudflare-tunnel
+                - Cloudflare DNS:
+                    icon: cloudflare.png
+                    href: https://dash.cloudflare.com/${CLOUDFLARE_ACCOUNT_ID}/${SECRET_DOMAIN}/dns/records
+                    description: Public DNS reconciler
+                    namespace: network
+                    podSelector: app.kubernetes.io/instance=cloudflare-dns
+                - UniFi DNS:
+                    icon: unifi.png
+                    description: Internal DNS reconciler
+                    namespace: network
+                    podSelector: app.kubernetes.io/instance=unifi-dns
+                - UniFi Console:
+                    icon: unifi.png
+                    href: https://10.10.10.1
+                    description: Network controller
             - Observability:
                 - Grafana:
                     icon: grafana.png
@@ -187,6 +172,27 @@ spec:
                       url: http://kube-prometheus-stack-grafana.observability.svc.cluster.local
                       username: ${GRAFANA_USERNAME}
                       password: ${GRAFANA_PASSWORD}
+                - Grafana Dashboards:
+                    icon: grafana.png
+                    href: https://grafana.${SECRET_DOMAIN}/dashboards
+                    description: Dashboard library
+                - Grafana Explore:
+                    icon: grafana.png
+                    href: https://grafana.${SECRET_DOMAIN}/explore
+                    description: Metrics and logs explorer
+                - Grafana Alerting:
+                    icon: grafana.png
+                    href: https://grafana.${SECRET_DOMAIN}/alerting/list
+                    description: Alert rules and history
+                - Gatus:
+                    icon: mdi-heart-pulse
+                    href: https://gatus.${SECRET_DOMAIN}
+                    description: Status checks
+                    namespace: default
+                    app: gatus
+                    widget:
+                      type: gatus
+                      url: http://gatus.default.svc.cluster.local:8080
                 - Prometheus:
                     icon: prometheus.png
                     description: Metrics storage
@@ -199,13 +205,76 @@ spec:
                     description: HTTP debug echo service
                     namespace: default
                     app: echo
-            - Git:
+                - Firecrawl:
+                    icon: mdi-fire
+                    href: https://firecrawl.${SECRET_DOMAIN}
+                    description: Web crawling and scraping API
+                    namespace: default
+                    podSelector: app=firecrawl-api
+                - Termix:
+                    icon: mdi-console
+                    href: https://termix.${SECRET_DOMAIN}
+                    description: Web terminal
+                    namespace: default
+                    app: termix
+            - GitOps:
                 - Forgejo:
                     icon: forgejo.png
                     href: https://forgejo.${SECRET_DOMAIN}
                     description: Git hosting
                     namespace: forgejo
                     app: forgejo
+                - Home Ops GitHub:
+                    icon: github.png
+                    href: https://github.com/LukasParke/home-ops
+                    description: Cluster GitOps repository
+                - GitHub Webhooks:
+                    icon: github.png
+                    href: https://github.com/LukasParke/home-ops/settings/hooks
+                    description: Flux webhook settings
+                - Renovate Dashboard:
+                    icon: renovate.png
+                    href: https://github.com/LukasParke/home-ops/issues?q=is%3Aissue+Dependency+Dashboard
+                    description: Dependency update dashboard
+            - Operations:
+                - Homepage:
+                    icon: homepage.png
+                    href: https://homepage.${SECRET_DOMAIN}
+                    description: Application dashboard
+                    namespace: default
+                    app: homepage
+                - Homepage Config:
+                    icon: homepage.png
+                    href: https://github.com/LukasParke/home-ops/blob/main/kubernetes/docs/homepage.md
+                    description: Dashboard configuration notes
+                - Storage/NFS Runbook:
+                    icon: mdi-nas
+                    href: https://github.com/LukasParke/home-ops/blob/main/kubernetes/docs/storage-nfs.md
+                    description: NFS storage operations
+                - NFS CSI Driver Docs:
+                    icon: kubernetes.png
+                    href: https://github.com/kubernetes-csi/csi-driver-nfs
+                    description: Kubernetes NFS CSI driver
+                - Flux Docs:
+                    icon: flux.png
+                    href: https://fluxcd.io/flux/
+                    description: GitOps controller documentation
+                - Talos Docs:
+                    icon: talos.png
+                    href: https://www.talos.dev/
+                    description: Kubernetes OS documentation
+                - Cilium Docs:
+                    icon: cilium.png
+                    href: https://docs.cilium.io/
+                    description: CNI and load balancer documentation
+                - Envoy Gateway Docs:
+                    icon: si-envoyproxy
+                    href: https://gateway.envoyproxy.io/
+                    description: Gateway API implementation docs
+                - cert-manager Docs:
+                    icon: cert-manager.png
+                    href: https://cert-manager.io/docs/
+                    description: Certificate automation docs
     controllers:
       homepage:
         strategy: Recreate
@@ -285,7 +354,7 @@ spec:
           gethomepage.dev/enabled: "false"
           gethomepage.dev/name: Homepage
           gethomepage.dev/description: Application dashboard
-          gethomepage.dev/group: Cluster
+          gethomepage.dev/group: Operations
           gethomepage.dev/icon: homepage.png
           gethomepage.dev/href: "https://homepage.${SECRET_DOMAIN}"
         hostnames: ["homepage.${SECRET_DOMAIN}"]

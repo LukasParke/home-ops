@@ -1,0 +1,108 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: firecrawl
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: ./kubernetes/apps/default/firecrawl/app/chart
+      interval: 1h
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+  valuesFrom:
+    - kind: Secret
+      name: cluster-secrets
+      valuesKey: FIRECRAWL_BULL_AUTH_KEY
+      targetPath: secret.BULL_AUTH_KEY
+  values:
+    fullnameOverride: firecrawl
+    resources:
+      enabled: true
+    image:
+      repository: ghcr.io/firecrawl/firecrawl
+      tag: latest
+      pullPolicy: Always
+    playwright:
+      repository: ghcr.io/firecrawl/playwright-service
+      tag: latest
+      pullPolicy: Always
+    nuqPostgres:
+      image:
+        repository: ghcr.io/firecrawl/nuq-postgres
+        tag: latest
+        pullPolicy: Always
+      auth:
+        username: firecrawl
+        password: firecrawl
+        database: firecrawl
+      persistence:
+        enabled: true
+        size: 5Gi
+        storageClass: nfs
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    api:
+      resources:
+        requests:
+          cpu: 250m
+          memory: 512Mi
+        limits:
+          memory: 6Gi
+    worker:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 4Gi
+    extractWorker:
+      enabled: true
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 3Gi
+    nuqWorker:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 4Gi
+    nuqPrefetchWorker:
+      enabled: true
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 2Gi
+    rabbitmq:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    config:
+      NUM_WORKERS_PER_QUEUE: "2"
+      NUQ_WORKER_COUNT: "1"
+      FIRECRAWL_APP_SCHEME: https
+      FIRECRAWL_APP_HOST: firecrawl.${SECRET_DOMAIN}
+      FIRECRAWL_APP_PORT: "443"
+      LOGGING_LEVEL: INFO
+    playwrightConfig:
+      MAX_CONCURRENT_PAGES: "4"
