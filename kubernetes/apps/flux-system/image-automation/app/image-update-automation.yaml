@@ -21,7 +21,7 @@ spec:
         Automated image update
 
         Images:
-        {{ range .Updated.Images -}}
+        {{ range .Changed.Images -}}
         - {{.}}
         {{ end }}
     push:
