@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: blog
-          image: ghcr.io/lukasparke/parke.dev:run-1 # {"$imagepolicy": "flux-system:parke-dev-blog"}
+          image: ghcr.io/lukasparke/parke.dev:latest # {"$imagepolicy": "flux-system:parke-dev-blog"}
           ports:
             - name: http
               containerPort: 3000
