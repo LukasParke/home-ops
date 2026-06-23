@@ -1,0 +1,129 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: litellm
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: litellm
+  interval: 1h
+  values:
+    nameOverride: litellm
+    fullnameOverride: litellm
+
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+
+    replicaCount: 1
+
+    # Use the database-enabled image from the chart defaults.
+    # Pinning the tag is handled by Renovate on the OCIRepository tag.
+    image:
+      pullPolicy: IfNotPresent
+
+    service:
+      type: ClusterIP
+      port: 4000
+
+    livenessProbe:
+      path: /health/liveliness
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 5
+
+    readinessProbe:
+      path: /health/readiness
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+    startupProbe:
+      path: /health/readiness
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
+
+    # Pull master key from the shared SOPS secret.
+    masterkeySecretName: cluster-secrets
+    masterkeySecretKey: LITELLM_MASTER_KEY
+
+    # Inject all cluster-secrets as env vars so config.yaml can reference them
+    # with os.environ/<KEY> (provider keys, UI credentials, salt, etc.).
+    environmentSecrets:
+      - cluster-secrets
+
+    # Use the cloudnative-pg cluster managed in cluster-postgres.yaml.
+    # Disable the chart-embedded Postgres and Redis; use cloudnative-pg and
+    # add Redis caching later if needed.
+    db:
+      useExisting: true
+      deployStandalone: false
+      endpoint: litellm-database-rw.default.svc.cluster.local
+      database: litellm
+      url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
+      secret:
+        name: litellm-database-app
+        usernameKey: username
+        passwordKey: password
+    postgresql:
+      enabled: false
+    redis:
+      enabled: false
+
+    # The proxy configuration is rendered as /etc/litellm/config.yaml.
+    # Replace the placeholder model with real providers once their API keys
+    # are added to cluster-secrets.sops.yaml.
+    proxy_config:
+      model_list:
+        - model_name: fake-openai-endpoint
+          litellm_params:
+            model: openai/fake
+            api_key: fake-key
+            api_base: https://exampleopenaiendpoint-production.up.railway.app/
+      general_settings:
+        master_key: os.environ/PROXY_MASTER_KEY
+        database_url: os.environ/DATABASE_URL
+        proxy_batch_writing: true
+        ui_username: os.environ/LITELLM_UI_USERNAME
+        ui_password: os.environ/LITELLM_UI_PASSWORD
+        enable_jwt_auth: false
+      litellm_settings:
+        drop_params: true
+        set_verbose: false
+
+    logLevel: INFO
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        memory: 2Gi
+
+    migrationJob:
+      enabled: true
+      retries: 3
+      backoffLimit: 4
+      ttlSecondsAfterFinished: 120
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+
+    serviceMonitor:
+      enabled: true
+      interval: 15s
+      scrapeTimeout: 10s
+
+    ingress:
+      enabled: false
+
+    autoscaling:
+      enabled: false

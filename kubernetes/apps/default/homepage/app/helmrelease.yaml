@@ -211,6 +211,12 @@ spec:
                     description: Web crawling and scraping API
                     namespace: default
                     podSelector: app=firecrawl-api
+                - LiteLLM:
+                    icon: mdi-brain
+                    href: https://litellm.${SECRET_DOMAIN}
+                    description: LLM proxy and API key management
+                    namespace: default
+                    app: litellm
                 - Termix:
                     icon: mdi-console
                     href: https://termix.${SECRET_DOMAIN}
