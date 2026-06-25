@@ -46,5 +46,16 @@ spec:
       dashboards:
         enabled: true
 
+    securityContext:
+      privileged: true
+      allowPrivilegeEscalation: true
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+        add:
+          - PERFMON
+          - SYS_RAWIO
+
     tolerations:
       - operator: Exists
