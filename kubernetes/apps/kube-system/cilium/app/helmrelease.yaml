@@ -8,6 +8,10 @@ spec:
     kind: OCIRepository
     name: cilium
   interval: 1h
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
   values:
     bpf:
       masquerade: true
