@@ -45,24 +45,12 @@ spec:
           valueExpr: string(int(result)) + " pods"
         - id: cluster_cpu_usage
           title: CPU
-          query: |
-            round(
-              sum(rate(container_cpu_usage_seconds_total{id="/",job="kubelet"}[5m]))
-              /
-              sum(machine_cpu_cores{job="node-exporter"})
-              * 100, 1
-            )
+          query: round(sum(rate(container_cpu_usage_seconds_total[5m])) / sum(machine_cpu_cores) * 100, 1)
           valueExpr: string(int(result)) + "%"
           colorExpr: 'result <= 50.0 ? "green" : result <= 80.0 ? "orange" : "red"'
         - id: cluster_memory_usage
           title: Memory
-          query: |
-            round(
-              sum(container_memory_working_set_bytes{id="/",job="kubelet"})
-              /
-              sum(machine_memory_bytes{job="node-exporter"})
-              * 100, 1
-            )
+          query: round(sum(container_memory_working_set_bytes) / sum(machine_memory_bytes) * 100, 1)
           valueExpr: string(int(result)) + "%"
           colorExpr: 'result <= 50.0 ? "green" : result <= 80.0 ? "orange" : "red"'
 
