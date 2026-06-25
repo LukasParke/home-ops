@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -21,23 +22,26 @@ spec:
               title: Status
               header: Gatus
             endpoints:
-              - name: Homepage
-                url: "https://homepage.${SECRET_DOMAIN}"
-                interval: 5m
-                conditions:
-                  - "[STATUS] == 200"
               - name: SailPoint Developer Docs
                 url: "https://developer.sailpoint.com"
                 interval: 5m
                 conditions:
                   - "[STATUS] == 200"
-              - name: LiteLLM
-                url: "https://litellm.${SECRET_DOMAIN}/health/liveliness"
-                interval: 5m
-                conditions:
-                  - "[STATUS] == 200"
     controllers:
       gatus:
+        strategy: RollingUpdate
+        serviceAccount:
+          name: gatus
+        initContainers:
+          copy-config:
+            image:
+              repository: docker.io/library/busybox
+              tag: 1.37.0
+            command: ["sh", "-c", "cp /tmp/gatus-config/config.yaml /config/config.yaml"]
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -45,7 +49,7 @@ spec:
               tag: v5.35.0
             args:
               - --config
-              - /config/config.yaml
+              - /config
             probes:
               liveness: &probes
                 enabled: true
@@ -68,11 +72,31 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
+          sidecar:
+            image:
+              repository: ghcr.io/home-operations/gatus-sidecar
+              tag: latest
+            args:
+              - --auto-httproute
+              - --auto-service
+              - --gateway-name=envoy-external
+              - --output=/config/gatus-sidecar.yaml
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
         runAsGroup: 65534
+        fsGroup: 65534
     service:
       app:
         ports:
@@ -85,10 +109,20 @@ spec:
         identifier: gatus-config
         advancedMounts:
           gatus:
-            app:
-              - path: /config/config.yaml
-                subPath: config.yaml
+            copy-config:
+              - path: /tmp/gatus-config
                 readOnly: true
+      config:
+        enabled: true
+        type: emptyDir
+        advancedMounts:
+          gatus:
+            copy-config:
+              - path: /config
+            app:
+              - path: /config
+            sidecar:
+              - path: /config
     route:
       app:
         annotations:

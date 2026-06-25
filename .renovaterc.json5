@@ -4,6 +4,7 @@
     "config:recommended",
     "docker:enableMajor",
     "helpers:pinGitHubActionDigests",
+    "github>home-operations/renovate-presets",
     ":automergeBranch",
     ":dependencyDashboard",
     ":disableRateLimiting",
