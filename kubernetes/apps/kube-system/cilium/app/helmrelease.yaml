@@ -63,6 +63,8 @@ spec:
     loadBalancer:
       algorithm: maglev
       mode: "dsr"
+    nodePort:
+      directRoutingDevice: eno1
     localRedirectPolicies:
       enabled: true
     operator:
