@@ -31,6 +31,9 @@ spec:
       enabled: true
     envoy:
       enabled: false
+    extraConfig:
+      direct-routing-device: eno1
+      enable-runtime-device-detection: "false"
     gatewayAPI:
       enabled: false
     hubble:
