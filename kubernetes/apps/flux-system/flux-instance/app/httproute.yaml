@@ -5,6 +5,7 @@ metadata:
   name: github-webhook
   annotations:
     gethomepage.dev/enabled: "false"
+    gatus.home-operations.com/enabled: "false"
 spec:
   hostnames: ["flux-webhook.${SECRET_DOMAIN}"]
   parentRefs:
