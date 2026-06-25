@@ -21,6 +21,8 @@ spec:
       enabled: false
     kubeScheduler:
       enabled: false
+    kubeEtcd:
+      enabled: false
     nodeExporter:
       enabled: true
     prometheus:
