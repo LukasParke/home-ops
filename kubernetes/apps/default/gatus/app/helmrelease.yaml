@@ -11,6 +11,10 @@ spec:
   interval: 1h
   values:
     fullnameOverride: gatus
+    serviceAccount:
+      gatus:
+        enabled: true
+        name: gatus
     configMaps:
       gatus-config:
         enabled: true
