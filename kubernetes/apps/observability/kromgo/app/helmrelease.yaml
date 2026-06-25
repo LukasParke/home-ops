@@ -32,11 +32,9 @@ spec:
           query: |
             time() - min(kube_node_created)
           valueExpr: |
-            duration(result).hours() < 24.0
-              ? string(int(duration(result).minutes())) + "m"
-              : duration(result).hours() < 720.0
-                ? string(int(duration(result).hours())) + "h"
-                : string(int(duration(result).hours() / 24.0)) + "d"
+            result < 3600.0 ? string(int(result / 60.0)) + "m"
+            : result < 86400.0 ? string(int(result / 3600.0)) + "h"
+            : string(int(result / 86400.0)) + "d"
         - id: cluster_node_count
           title: Nodes
           query: count(kube_node_info)
