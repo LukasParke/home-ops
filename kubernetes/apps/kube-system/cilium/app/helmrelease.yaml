@@ -8,15 +8,10 @@ spec:
     kind: OCIRepository
     name: cilium
   interval: 1h
-  install:
-    disableWait: true
-  upgrade:
-    disableWait: true
   values:
     bpf:
       masquerade: true
       hostLegacyRouting: false
-    cleanBpfState: true
     cni:
       # Required for pairing with Multus CNI
       exclusive: false
@@ -37,10 +32,12 @@ spec:
       enabled: false
     hubble:
       enabled: true
+      # relay/ui disabled: peer service internalTrafficPolicy=Local is broken
+      # in VXLAN tunnel mode and causes CrashLoopBackOff.
       relay:
-        enabled: true
+        enabled: false
       ui:
-        enabled: true
+        enabled: false
       metrics:
         enabled:
           - dns:query
