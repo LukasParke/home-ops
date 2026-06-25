@@ -85,6 +85,8 @@ spec:
               - --gateway-name=envoy-external
               - --prefix-httproute=[Web] 
               - --prefix-service=[TCP] 
+              - --exclude-namespace=kube-system
+              - --exclude-namespace=system-upgrade
               - --output=/config/gatus-sidecar.yaml
             securityContext:
               allowPrivilegeEscalation: false
