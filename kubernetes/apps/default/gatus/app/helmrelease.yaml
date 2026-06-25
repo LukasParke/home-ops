@@ -83,8 +83,8 @@ spec:
               - --auto-httproute
               - --auto-service
               - --gateway-name=envoy-external
-              - --prefix-httproute="[Web] "
-              - --prefix-service="[TCP] "
+              - --prefix-httproute=[Web] 
+              - --prefix-service=[TCP] 
               - --output=/config/gatus-sidecar.yaml
             securityContext:
               allowPrivilegeEscalation: false
