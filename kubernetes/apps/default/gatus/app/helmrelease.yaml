@@ -14,7 +14,7 @@ spec:
     serviceAccount:
       gatus:
         enabled: true
-        name: gatus
+        forceRename: gatus
     configMaps:
       gatus-config:
         enabled: true
