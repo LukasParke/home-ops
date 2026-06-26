@@ -85,10 +85,6 @@ spec:
               - --gateway-name=envoy-external
               - --prefix-httproute=[Web] 
               - --prefix-service=[TCP] 
-              - --namespace=default
-              - --namespace=projects
-              - --namespace=observability
-              - --namespace=forgejo
               - --output=/config/gatus-sidecar.yaml
             securityContext:
               allowPrivilegeEscalation: false
