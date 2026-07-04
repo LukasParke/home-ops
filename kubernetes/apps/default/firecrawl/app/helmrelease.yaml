@@ -24,16 +24,16 @@ spec:
       enabled: true
     image:
       repository: ghcr.io/firecrawl/firecrawl
-      tag: latest
+      tag: latest@sha256:c92c5705fcc106e488be4b4279968a31602504bc641e93e9d5fe62ca13877423
       pullPolicy: Always
     playwright:
       repository: ghcr.io/firecrawl/playwright-service
-      tag: latest
+      tag: latest@sha256:c13a0e147e8b6a503093d68edfb223ac65c989058f7e0ef606ee2958b38ff604
       pullPolicy: Always
     nuqPostgres:
       image:
         repository: ghcr.io/firecrawl/nuq-postgres
-        tag: latest
+        tag: latest@sha256:4ca6718b2cef40404b046db5cd37ae45db3e44d1a5750c80522f3587a5b193d5
         pullPolicy: Always
       auth:
         username: firecrawl
