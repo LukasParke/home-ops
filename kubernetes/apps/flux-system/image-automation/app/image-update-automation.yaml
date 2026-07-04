@@ -1,5 +1,5 @@
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageUpdateAutomation
 metadata:
   name: parke-dev
@@ -18,12 +18,11 @@ spec:
         name: Flux Bot
         email: flux@parke.dev
       messageTemplate: |
-        Automated image update
+        chore(images): automated image update
 
-        Images:
-        {{ range .Changed.Images -}}
-        - {{.}}
-        {{ end }}
+        {{ range .Changed.Changes -}}
+        - {{ .OldValue }} -> {{ .NewValue }}
+        {{ end -}}
     push:
       branch: main
   update:
