@@ -8,7 +8,7 @@ spec:
   interval: 1m
   sourceRef:
     kind: GitRepository
-    name: flux-system
+    name: home-ops-push
   git:
     checkout:
       ref:
