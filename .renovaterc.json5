@@ -47,6 +47,15 @@
       minimumGroupSize: 3,
     },
     {
+      description: "bjw-s app-template group",
+      groupName: "bjw-s-app-template",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/ghcr.io/bjw-s-labs/helm/app-template/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}}",
+      },
+    },
+    {
       description: "Auto-merge GitHub Actions",
       matchManagers: ["github-actions"],
       automerge: true,
@@ -54,6 +63,21 @@
       matchUpdateTypes: ["minor", "patch", "digest"],
       minimumReleaseAge: "3 days",
       ignoreTests: true,
+    },
+    {
+      description: "Auto-merge safe Helm and Docker updates",
+      matchDatasources: ["docker", "helm"],
+      automerge: true,
+      automergeType: "branch",
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      minimumReleaseAge: "3 days",
+      ignoreTests: false,
+    },
+    {
+      description: "Ignore images managed by Flux image-automation",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/ghcr.io/lukasparke/parke.dev/"],
+      enabled: false,
     },
     {
       matchUpdateTypes: ["major"],

@@ -1,0 +1,47 @@
+---
+name: Renovate
+
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: Dry run mode
+        default: "false"
+        required: false
+      logLevel:
+        description: Log level
+        default: info
+        required: false
+  schedule:
+    - cron: "0 * * * *"
+  push:
+    branches: ["main"]
+    paths:
+      - .renovaterc.json5
+      - .github/workflows/renovate.yaml
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  renovate:
+    name: Renovate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Renovate
+        uses: renovatebot/github-action@dd5302ec17783b2fc721b19ae7209b57b1587765 # v46.1.17
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun == 'true' && 'full' || null }}
+          RENOVATE_PLATFORM: github
+          RENOVATE_REPOSITORIES: ${{ github.repository }}

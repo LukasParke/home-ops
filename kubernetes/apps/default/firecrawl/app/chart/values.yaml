@@ -63,7 +63,7 @@ nuqPostgres:
   replicaCount: 1
   image:
     repository: docker.io/winkkgmbh/nuq-postgres
-    tag: latest
+    tag: latest@sha256:3d68a0078f650c316935f34e6bb3058fb8c9c14f00606c2bb1fe563768e7d8f6
     pullPolicy: Always
   auth:
     username: postgres
@@ -95,13 +95,13 @@ rabbitmq:
 
 image:
   repository: docker.io/winkkgmbh/firecrawl
-  tag: "latest"
+  tag: "latest@sha256:b9ccf2b29722257c154b20e6e5a233fc56d1181b70c6b9fd763cf55b4f3c8d87"
   pullPolicy: Always
   dockerSecretEnabled: false
 
 playwright:
   repository: docker.io/winkkgmbh/firecrawl-playwright
-  tag: "latest"
+  tag: "latest@sha256:d84e22d726d16f2607c898abdb49d1c34239ed1b6181335e3531a6031f45423f"
   pullPolicy: Always
   replicaCount: 1
 
