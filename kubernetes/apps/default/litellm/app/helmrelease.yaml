@@ -168,6 +168,24 @@ spec:
             model: openai/qwen3-embed
           model_info:
             mode: embedding
+        # ── hephaestus (10.10.10.65 — RTX 3080 10GB, llama-swap on :8081) ──
+        # gpt-oss-20b and qwen3-embed are dual-homed with thor (load balanced).
+        - model_name: gpt-oss-20b
+          litellm_params: &hephaestus
+            model: openai/gpt-oss-20b
+            api_base: http://10.10.10.65:8081/v1
+            api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
+            timeout: 600
+        - model_name: ornith-9b
+          litellm_params:
+            <<: *hephaestus
+            model: openai/ornith-9b
+        - model_name: qwen3-embed
+          litellm_params:
+            <<: *hephaestus
+            model: openai/qwen3-embed
+          model_info:
+            mode: embedding
       router_settings:
         num_retries: 2
         routing_strategy: simple-shuffle
