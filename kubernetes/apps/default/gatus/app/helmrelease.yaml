@@ -50,7 +50,7 @@ spec:
           app:
             image:
               repository: docker.io/twinproduction/gatus
-              tag: v5.35.0
+              tag: v5.36.0
             env:
               GATUS_CONFIG_PATH: /config
             probes:
