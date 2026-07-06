@@ -107,8 +107,9 @@ spec:
     # models on demand). Keys live in cluster-secrets.sops.yaml and are
     # injected via environmentSecrets. Cold model swaps can take 30-90s
     # (235B: minutes), hence the generous per-deployment timeouts.
-    # NOTE: ornith-35b is served by BOTH hosts under one public name —
-    # LiteLLM round-robins and fails over between them.
+    # Deduplicated 2026-07-06: each model routes to the host that benched
+    # best for it (ornith-35b + gpt-oss-20b -> thor 5090; qwen3-embed ->
+    # hephaestus to keep thor free for interactive load).
     proxy_config:
       model_list:
         # ── cerberus (10.10.10.218 — Strix Halo 128GB, llama-swap) ──
@@ -126,14 +127,6 @@ spec:
           litellm_params:
             <<: *cerberus
             model: openai/qwen3.6-35b-fast
-        - model_name: ornith-35b
-          litellm_params:
-            <<: *cerberus
-            model: openai/ornith-35b
-        - model_name: ornith-35b-fast
-          litellm_params:
-            <<: *cerberus
-            model: openai/ornith-35b-fast
         - model_name: qwen3-coder-next-80b
           litellm_params:
             <<: *cerberus
@@ -162,24 +155,13 @@ spec:
           litellm_params:
             <<: *thor
             model: openai/gpt-oss-20b
-        - model_name: qwen3-embed
-          litellm_params:
-            <<: *thor
-            model: openai/qwen3-embed
-          model_info:
-            mode: embedding
         # ── hephaestus (10.10.10.65 — RTX 3080 10GB, llama-swap on :8081) ──
-        # gpt-oss-20b and qwen3-embed are dual-homed with thor (load balanced).
-        - model_name: gpt-oss-20b
+        - model_name: ornith-9b
           litellm_params: &hephaestus
-            model: openai/gpt-oss-20b
+            model: openai/ornith-9b
             api_base: http://10.10.10.65:8081/v1
             api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
             timeout: 600
-        - model_name: ornith-9b
-          litellm_params:
-            <<: *hephaestus
-            model: openai/ornith-9b
         - model_name: qwen3-embed
           litellm_params:
             <<: *hephaestus
