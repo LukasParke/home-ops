@@ -1,0 +1,13 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: home-ops-push
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: ssh://git@github.com/LukasParke/home-ops.git
+  ref:
+    branch: main
+  secretRef:
+    name: flux-image-automation
