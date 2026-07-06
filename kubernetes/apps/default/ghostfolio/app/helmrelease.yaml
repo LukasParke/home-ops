@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghostfolio/ghostfolio
-              tag: "2.255.0"
+              tag: "3.21.0"
             env:
               NODE_ENV: production
               HOST: "0.0.0.0"
