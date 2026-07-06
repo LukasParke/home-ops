@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: guacd
-          image: docker.io/guacamole/guacd:1.5.5
+          image: docker.io/guacamole/guacd:1.6.0
           ports:
             - name: guacd
               containerPort: 4822
