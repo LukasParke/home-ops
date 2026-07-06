@@ -155,11 +155,11 @@ spec:
           litellm_params:
             <<: *thor
             model: openai/gpt-oss-20b
-        # ── hephaestus (10.10.10.65 — RTX 3080 10GB, llama-swap on :8081) ──
+        # ── hephaestus (10.10.10.65 — RTX 3080 10GB, llama-swap) ──
         - model_name: ornith-9b
           litellm_params: &hephaestus
             model: openai/ornith-9b
-            api_base: http://10.10.10.65:8081/v1
+            api_base: http://10.10.10.65:8080/v1
             api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
             timeout: 600
         - model_name: qwen3-embed
