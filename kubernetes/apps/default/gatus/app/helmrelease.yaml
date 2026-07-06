@@ -40,7 +40,7 @@ spec:
           copy-config:
             image:
               repository: docker.io/library/busybox
-              tag: 1.37.0
+              tag: 1.38.0
             command: ["sh", "-c", "cp /tmp/gatus-config/config.yaml /config/config.yaml"]
             securityContext:
               allowPrivilegeEscalation: false
