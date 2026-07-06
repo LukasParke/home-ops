@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +16,7 @@ spec:
     spec:
       containers:
         - name: portfolio
-          image: ghcr.io/lukasparke/parke.dev-portfolio:run-17 # {"$imagepolicy": "flux-system:parke-dev-portfolio"}
+          image: ghcr.io/lukasparke/parke.dev-portfolio:run-18 # {"$imagepolicy": "flux-system:parke-dev-portfolio"}
           imagePullPolicy: Always
           ports:
             - name: http

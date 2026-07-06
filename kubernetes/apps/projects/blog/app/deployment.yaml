@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +16,7 @@ spec:
     spec:
       containers:
         - name: blog
-          image: ghcr.io/lukasparke/parke.dev:run-14 # {"$imagepolicy": "flux-system:parke-dev-blog"}
+          image: ghcr.io/lukasparke/parke.dev:run-18 # {"$imagepolicy": "flux-system:parke-dev-blog"}
           imagePullPolicy: Always
           ports:
             - name: http
