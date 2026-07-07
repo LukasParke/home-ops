@@ -126,6 +126,7 @@ spec:
             api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
             timeout: 600
           model_info:
+            supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
             hardware: Radeon 8060S iGPU, Vulkan
             quantization: MXFP4 (native)
@@ -168,6 +169,7 @@ spec:
             <<: *cerberus
             model: openai/qwen3-coder-next-80b
           model_info:
+            supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
             hardware: Radeon 8060S iGPU, Vulkan
             quantization: UD-Q4_K_XL
@@ -182,6 +184,7 @@ spec:
             model: openai/qwen3-235b-overnight
             timeout: 1200
           model_info:
+            supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
             hardware: Radeon 8060S iGPU, Vulkan
             quantization: UD-Q3_K_XL (97GB)
@@ -211,6 +214,7 @@ spec:
             <<: *thor
             model: openai/qwen3.6-27b
           model_info:
+            supports_vision: false
             host: thor (RTX 5090 32GB)
             hardware: CUDA sm_120
             quantization: UD-Q5_K_XL + MTP speculative decoding
@@ -222,6 +226,7 @@ spec:
             <<: *thor
             model: openai/ornith-35b
           model_info:
+            supports_vision: false
             host: thor (RTX 5090 32GB)
             hardware: CUDA sm_120
             quantization: APEX-I-Quality + MTP speculative decoding
@@ -235,6 +240,7 @@ spec:
             <<: *thor
             model: openai/gpt-oss-20b
           model_info:
+            supports_vision: false
             host: thor (RTX 5090 32GB)
             hardware: CUDA sm_120
             quantization: MXFP4 (native)
@@ -251,6 +257,7 @@ spec:
             api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
             timeout: 600
           model_info:
+            supports_vision: false
             host: hephaestus (RTX 3080 10GB)
             hardware: CUDA sm_86
             quantization: Q5_K_M + DFlash speculative decoding (~76% acceptance)
@@ -278,6 +285,7 @@ spec:
             <<: *hephaestus
             model: openai/qwen3-embed
           model_info:
+            supports_vision: false
             mode: embedding
             host: hephaestus (RTX 3080 10GB)
             hardware: CUDA sm_86
