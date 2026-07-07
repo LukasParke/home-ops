@@ -19,6 +19,19 @@ spec:
           ports:
             - name: guacd
               containerPort: 4822
+          probes:
+            liveness: &probe
+              tcpSocket:
+                port: guacd
+              initialDelaySeconds: 10
+              periodSeconds: 30
+              timeoutSeconds: 5
+              failureThreshold: 3
+            readiness: *probe
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities: { drop: ["ALL"] }
           resources:
             requests:
               cpu: 25m
