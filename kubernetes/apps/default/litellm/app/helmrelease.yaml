@@ -111,63 +111,180 @@ spec:
     # best for it (ornith-35b + gpt-oss-20b -> thor 5090; qwen3-embed ->
     # hephaestus to keep thor free for interactive load).
     proxy_config:
+      # Fleet catalog — one host per model, chosen by real-task benchmarks
+      # (suite: codegen, bugfix, reasoning, JSON extraction, 8k-token retrieval;
+      # numbers in model_info are measured, not estimated). Vision models accept
+      # OpenAI image_url content parts. Cold model swaps take 30-90s (235B:
+      # minutes), hence generous timeouts. Updated 2026-07-07: VL models added,
+      # qwen3.6-35b-fast retired (thor's qwen3.6-35b-a3b dominates it).
       model_list:
-        # ── cerberus (10.10.10.218 — Strix Halo 128GB, llama-swap) ──
+        # ── cerberus — Strix Halo (Ryzen AI MAX+ 395), 128GB unified, Vulkan ──
         - model_name: gpt-oss-120b
           litellm_params: &cerberus
             model: openai/gpt-oss-120b
             api_base: http://10.10.10.218:8080/v1
             api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
             timeout: 600
+          model_info:
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: MXFP4 (native)
+            max_input_tokens: 65536
+            measured_generation_tps: "51-55"
+            measured_prompt_tps_8k: "755"
+            ttft_8k_cold: "~12s"
+            quality: "5/5 on real-task suite; reasoning_effort=high"
+            notes: "Fleet quality flagship; resident (no swap latency)"
         - model_name: qwen3.6-35b
           litellm_params:
             <<: *cerberus
             model: openai/qwen3.6-35b
-        - model_name: qwen3.6-35b-fast
+          model_info:
+            supports_vision: true
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: Q8_0 + MTP speculative decoding
+            max_input_tokens: 131072
+            measured_generation_tps: "71-81 (vision requests ~70)"
+            measured_prompt_tps_8k: "809"
+            ttft_8k_cold: "~10s"
+            notes: "Highest-fidelity Qwen3.6; vision via mmproj (added 2026-07-07)"
+        - model_name: gemma-4-26b-a4b
           litellm_params:
             <<: *cerberus
-            model: openai/qwen3.6-35b-fast
+            model: openai/gemma-4-26b-a4b
+          model_info:
+            supports_vision: true
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: QAT UD-Q4_K_XL + MTP head (~80% acceptance)
+            max_input_tokens: 65536
+            measured_generation_tps: "72-98"
+            measured_prompt_tps_8k: "854"
+            ttft_8k_cold: "~10s"
+            notes: "Vision MoE (4B active); coexists with gpt-oss-120b, fast swaps"
         - model_name: qwen3-coder-next-80b
           litellm_params:
             <<: *cerberus
             model: openai/qwen3-coder-next-80b
+          model_info:
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: UD-Q4_K_XL
+            max_input_tokens: 131072
+            measured_generation_tps: "46-49"
+            measured_prompt_tps_8k: "489"
+            ttft_8k_cold: "~17s"
+            notes: "Terse agentic coder; sometimes skips requested unit tests"
         - model_name: qwen3-235b-overnight
           litellm_params:
             <<: *cerberus
             model: openai/qwen3-235b-overnight
             timeout: 1200
-        # ── thor (10.10.10.81 — RTX GPU, llama-swap) ──
+          model_info:
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: UD-Q3_K_XL (97GB)
+            max_input_tokens: 32768
+            measured_generation_tps: "15-17"
+            measured_prompt_tps_8k: "104-165"
+            ttft_8k_cold: "~80s"
+            quality: "Only perfect 5/5 sweep in the fleet"
+            notes: "Batch/overnight only — evicts other cerberus models while loaded"
+        # ── thor — RTX 5090 32GB, CUDA (sm_120) ──
         - model_name: qwen3.6-35b-a3b
           litellm_params: &thor
             model: openai/qwen3.6-35b-a3b
             api_base: http://10.10.10.81:8080/v1
             api_key: os.environ/THOR_LLAMASWAP_API_KEY
             timeout: 600
+          model_info:
+            supports_vision: true
+            host: thor (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: UD-Q4_K_XL + MTP speculative decoding
+            max_input_tokens: 262144
+            measured_generation_tps: "~317 (vision spot-test)"
+            notes: "Fleet's fastest Qwen3.6; vision via mmproj (added 2026-07-07)"
         - model_name: qwen3.6-27b
           litellm_params:
             <<: *thor
             model: openai/qwen3.6-27b
+          model_info:
+            host: thor (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: UD-Q5_K_XL + MTP speculative decoding
+            max_input_tokens: 65536
+            measured_generation_tps: "not yet benchmarked"
+            notes: "Dense quality model for hard coding/tool-use prompts"
         - model_name: ornith-35b
           litellm_params:
             <<: *thor
             model: openai/ornith-35b
+          model_info:
+            host: thor (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: APEX-I-Quality + MTP speculative decoding
+            max_input_tokens: 262144
+            measured_generation_tps: "291-341"
+            measured_prompt_tps_8k: "9356"
+            ttft_8k_cold: "~1s"
+            notes: "Agentic-coding specialist (DeepReinforce Ornith 1.0)"
         - model_name: gpt-oss-20b
           litellm_params:
             <<: *thor
             model: openai/gpt-oss-20b
-        # ── hephaestus (10.10.10.65 — RTX 3080 10GB, llama-swap) ──
+          model_info:
+            host: thor (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: MXFP4 (native)
+            max_input_tokens: 131072
+            measured_generation_tps: "352-390"
+            measured_prompt_tps_8k: "23306"
+            ttft_8k_cold: "~0.3s"
+            notes: "Fastest model in the fleet; ideal for long-prompt/short-answer"
+        # ── hephaestus — RTX 3080 10GB, CUDA (sm_86) ──
         - model_name: ornith-9b
           litellm_params: &hephaestus
             model: openai/ornith-9b
             api_base: http://10.10.10.65:8080/v1
             api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
             timeout: 600
+          model_info:
+            host: hephaestus (RTX 3080 10GB)
+            hardware: CUDA sm_86
+            quantization: Q5_K_M + DFlash speculative decoding (~76% acceptance)
+            max_input_tokens: 16384
+            measured_generation_tps: "124-160"
+            measured_prompt_tps_8k: "2183"
+            ttft_8k_cold: "~4s"
+            notes: "Fast agentic coding; fully VRAM-resident"
+        - model_name: gemma-4-12b
+          litellm_params:
+            <<: *hephaestus
+            model: openai/gemma-4-12b
+          model_info:
+            supports_vision: true
+            host: hephaestus (RTX 3080 10GB)
+            hardware: CUDA sm_86
+            quantization: QAT UD-Q4_K_XL + MTP head (~78% acceptance)
+            max_input_tokens: 16384
+            measured_generation_tps: "116-175"
+            measured_prompt_tps_8k: "2354"
+            ttft_8k_cold: "~4s"
+            notes: "Fast vision model; fully VRAM-resident (added 2026-07-07)"
         - model_name: qwen3-embed
           litellm_params:
             <<: *hephaestus
             model: openai/qwen3-embed
           model_info:
             mode: embedding
+            host: hephaestus (RTX 3080 10GB)
+            hardware: CUDA sm_86
+            quantization: Q8_0 (0.6B)
+            max_input_tokens: 8192
+            measured_throughput: "33 docs/s (~250 tok each), dim 1024"
+            notes: "Fleet's only embedding endpoint; always resident"
       router_settings:
         num_retries: 2
         routing_strategy: simple-shuffle
