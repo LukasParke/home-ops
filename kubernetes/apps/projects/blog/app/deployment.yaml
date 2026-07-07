@@ -30,6 +30,12 @@ spec:
             timeoutSeconds: 1
             failureThreshold: 3
           readinessProbe: *probe
+          env:
+            - name: HOME
+              value: /tmp
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
@@ -46,6 +52,9 @@ spec:
         runAsGroup: 65534
         fsGroup: 65534
         fsGroupChangePolicy: OnRootMismatch
+      volumes:
+        - name: tmp
+          emptyDir: {}
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
