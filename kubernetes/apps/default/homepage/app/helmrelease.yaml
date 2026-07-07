@@ -281,6 +281,10 @@ spec:
                     icon: cert-manager.png
                     href: https://cert-manager.io/docs/
                     description: Certificate automation docs
+    defaultPodOptions:
+      # homepage discovers HTTPRoutes via the Kubernetes API; app-template v5
+      # stops automounting SA tokens by default
+      automountServiceAccountToken: true
     controllers:
       homepage:
         strategy: Recreate
