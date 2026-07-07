@@ -21,19 +21,18 @@ spec:
           ports:
             - name: http
               containerPort: 3000
-          probes:
-            liveness: &probe
-              httpGet:
-                path: /
-                port: http
-              initialDelaySeconds: 10
-              periodSeconds: 10
-              timeoutSeconds: 1
-              failureThreshold: 3
-            readiness: *probe
+          livenessProbe: &probe
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe: *probe
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false
             capabilities: { drop: ["ALL"] }
           resources:
             requests:
