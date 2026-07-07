@@ -21,7 +21,8 @@ spec:
         data:
           config.yaml: |
             storage:
-              type: memory
+              type: sqlite
+              path: /data/data.db
             ui:
               title: Status
               header: Gatus
@@ -131,6 +132,16 @@ spec:
               - path: /config
             sidecar:
               - path: /config
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: nfs
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        advancedMounts:
+          gatus:
+            app:
+              - path: /data
     route:
       app:
         annotations:

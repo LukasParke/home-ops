@@ -45,8 +45,6 @@ spec:
               limits:
                 memory: 512Mi
     defaultPodOptions:
-      nodeSelector:
-        kubernetes.io/hostname: hades
       securityContext:
         runAsNonRoot: false
         fsGroup: 1000

@@ -15,4 +15,4 @@ spec:
         namespace: cnpg-system
   values:
     monitoring:
-      podMonitorEnabled: false
+      podMonitorEnabled: true
