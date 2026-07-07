@@ -97,6 +97,9 @@ spec:
               limits:
                 memory: 64Mi
     defaultPodOptions:
+      # gatus-sidecar watches the Kubernetes API; app-template v5 stops
+      # automounting SA tokens by default
+      automountServiceAccountToken: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534

@@ -80,6 +80,11 @@
       enabled: false,
     },
     {
+      description: "Ignore k3s false positive from the custom-manager example comment above",
+      matchPackageNames: ["k3s-io/k3s"],
+      enabled: false,
+    },
+    {
       matchUpdateTypes: ["major"],
       semanticCommitType: "feat",
       commitMessagePrefix: "{{semanticCommitType}}({{semanticCommitScope}})!:",
