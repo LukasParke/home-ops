@@ -1,0 +1,102 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: cilium
+  interval: 1h
+  values:
+    bpf:
+      masquerade: true
+      hostLegacyRouting: false
+    cni:
+      # Required for pairing with Multus CNI
+      exclusive: false
+    cgroup:
+      automount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    # NOTE: devices might need to be set if you have more than one active NIC on your hosts
+    # devices: eno+ eth+
+    devices: eno1
+    dashboards:
+      enabled: true
+    endpointRoutes:
+      enabled: true
+    envoy:
+      enabled: false
+    gatewayAPI:
+      enabled: false
+    hubble:
+      enabled: true
+      # relay/ui disabled: peer service internalTrafficPolicy=Local is broken
+      # in VXLAN tunnel mode and causes CrashLoopBackOff.
+      relay:
+        enabled: false
+      ui:
+        enabled: false
+      metrics:
+        enabled:
+          - dns:query
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - http
+        serviceMonitor:
+          enabled: true
+    ipam:
+      mode: kubernetes
+    k8sServiceHost: 127.0.0.1
+    k8sServicePort: 7445
+    kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    l2announcements:
+      enabled: true
+    loadBalancer:
+      algorithm: maglev
+      mode: snat
+    localRedirectPolicies:
+      enabled: true
+    operator:
+      dashboards:
+        enabled: true
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+      replicas: 2
+      rollOutPods: true
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
+    rollOutCiliumPods: true
+    routingMode: tunnel
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - PERFMON
+          - BPF
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    socketLB:
+      enabled: true
+      hostNamespaceOnly: true

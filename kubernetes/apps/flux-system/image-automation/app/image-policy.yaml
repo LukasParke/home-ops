@@ -1,0 +1,30 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: parke-dev-blog
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: parke-dev-blog
+  policy:
+    numerical:
+      order: asc
+  filterTags:
+    pattern: "^run-(?P<version>[0-9]+)$"
+    extract: "$version"
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: parke-dev-portfolio
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: parke-dev-portfolio
+  policy:
+    numerical:
+      order: asc
+  filterTags:
+    pattern: "^run-(?P<version>[0-9]+)$"
+    extract: "$version"

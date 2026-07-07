@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: termix-guacd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: termix-guacd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: termix-guacd
+    spec:
+      containers:
+        - name: guacd
+          image: docker.io/guacamole/guacd:1.6.0
+          ports:
+            - name: guacd
+              containerPort: 4822
+          livenessProbe: &probe
+            tcpSocket:
+              port: guacd
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe: *probe
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi

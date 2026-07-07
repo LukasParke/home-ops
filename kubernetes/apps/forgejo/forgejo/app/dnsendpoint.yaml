@@ -1,0 +1,12 @@
+---
+# Fallback when gateway-httproute does not publish routes to Cloudflare (same pattern as other apps).
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: forgejo-public-names
+spec:
+  endpoints:
+    - dnsName: "forgejo.${SECRET_DOMAIN}"
+      recordType: CNAME
+      targets:
+        - "external.${SECRET_DOMAIN}"

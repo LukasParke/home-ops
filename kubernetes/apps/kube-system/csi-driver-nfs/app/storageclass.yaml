@@ -1,0 +1,23 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: "10.10.10.215"
+  share: "/mnt/user/home-ops"
+  # NAS layout: <namespace>/<pvc-name>. SC parameters are immutable; recreate SC after removing PVCs.
+  subDir: "${pvc.metadata.namespace}/${pvc.metadata.name}"
+mountOptions:
+  - nfsvers=4.1
+  - proto=tcp
+  - hard
+  - timeo=600
+  - retrans=2
+  - noresvport
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+reclaimPolicy: Retain

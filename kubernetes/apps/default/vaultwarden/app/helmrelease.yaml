@@ -1,0 +1,125 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vaultwarden
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: vaultwarden
+  interval: 1h
+  values:
+    controllers:
+      vaultwarden:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/vaultwarden/server
+              tag: 1.36.0-alpine
+            env:
+              DOMAIN: "https://vault.${SECRET_DOMAIN}"
+              DATA_FOLDER: /data
+              ROCKET_PORT: &port 8080
+              SIGNUPS_ALLOWED: "false"
+              INVITATIONS_ALLOWED: "false"
+              WEBSOCKET_ENABLED: "true"
+              PASSWORD_HINTS_ALLOWED: "false"
+              SHOW_PASSWORD_HINT: "false"
+              SENDS_ALLOWED: "false"
+              IP_HEADER: X-Forwarded-For
+              # Avoid defaulting to 1 worker per vCPU; excess workers waste RAM on a small limit.
+              ROCKET_WORKERS: "2"
+              LOG_LEVEL: warn
+              EXTENDED_LOGGING: "true"
+              TZ: Etc/UTC
+            probes:
+              # Startup must use custom httpGet — without it the chart uses tcpSocket on the port, which
+              # can "succeed" before Rocket serves /alive (SQLite on NFS is slow) and liveness then
+              # kills the container in a loop.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /alive
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 120
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /alive
+                    port: *port
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /alive
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "false"
+          gethomepage.dev/name: Vaultwarden
+          gethomepage.dev/description: Password manager
+          gethomepage.dev/group: Security
+          gethomepage.dev/icon: vaultwarden.png
+          gethomepage.dev/href: "https://vault.${SECRET_DOMAIN}"
+        hostnames: ["vault.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: nfs
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir
