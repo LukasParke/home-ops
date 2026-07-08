@@ -206,21 +206,20 @@ spec:
             host: talos (RTX 5090 32GB)
             hardware: CUDA sm_120
             quantization: UD-Q4_K_XL + MTP speculative decoding
-            max_input_tokens: 131072
+            max_input_tokens: 196608
             measured_generation_tps: "~317 (vision spot-test)"
-            notes: "Fleet's fastest Qwen3.6; vision via mmproj. ctx capped 131072 (32GB VRAM ceiling)"
-        - model_name: qwen3.6-27b
+            notes: "Fleet's fastest Qwen3.6; vision via mmproj. Context bumped to 196608"
+        - model_name: devstral-24b
           litellm_params:
             <<: *talos
-            model: openai/qwen3.6-27b
+            model: openai/devstral-24b
           model_info:
             supports_vision: false
             host: talos (RTX 5090 32GB)
             hardware: CUDA sm_120
-            quantization: UD-Q5_K_XL + MTP speculative decoding
-            max_input_tokens: 65536
-            measured_generation_tps: "not yet benchmarked"
-            notes: "Dense quality model for hard coding/tool-use prompts"
+            quantization: Q4_K_M (Devstral 2, 24B dense)
+            max_input_tokens: 153600
+            notes: "Agentic coding specialist (Mistral Devstral-Small-2). Max context tuned for 32GB VRAM"
         - model_name: ornith-35b
           litellm_params:
             <<: *talos
@@ -230,11 +229,11 @@ spec:
             host: talos (RTX 5090 32GB)
             hardware: CUDA sm_120
             quantization: APEX-I-Quality + MTP speculative decoding
-            max_input_tokens: 131072
+            max_input_tokens: 196608
             measured_generation_tps: "291-341"
             measured_prompt_tps_8k: "9356"
             ttft_8k_cold: "~1s"
-            notes: "Agentic-coding specialist (DeepReinforce Ornith 1.0)"
+            notes: "Agentic-coding specialist (DeepReinforce Ornith 1.0). Context bumped to 196608"
         - model_name: gpt-oss-20b
           litellm_params:
             <<: *talos
@@ -294,9 +293,9 @@ spec:
             measured_throughput: "33 docs/s (~250 tok each), dim 1024"
             notes: "Fleet's only embedding endpoint; always resident"
         # ── delphi — RTX 4080 SUPER 16GB, CUDA (sm_89); fills fleet gaps ──
-        - model_name: mistral-small-24b
+        - model_name: phi-4
           litellm_params: &delphi
-            model: openai/mistral-small-24b
+            model: openai/phi-4
             api_base: http://10.10.10.18:8080/v1
             api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
             timeout: 600
@@ -304,10 +303,9 @@ spec:
             supports_vision: false
             host: delphi (RTX 4080 SUPER 16GB)
             hardware: CUDA sm_89
-            quantization: Q4_K_M (dense, fully in VRAM)
-            max_input_tokens: 16384
-            measured_generation_tps: "~155 prompt eval; benched 2026-07-08"
-            notes: "Dense mid-size generalist; only Mistral in fleet. Q4_K_M (Q5 OOMs 16GB)"
+            quantization: Q5_K_M (dense, ~9.9GB)
+            max_input_tokens: 36864
+            notes: "Microsoft Phi-4 14B; strong math/science reasoning. Max context for 16GB VRAM"
         - model_name: bge-reranker-v2-m3
           litellm_params:
             <<: *delphi
@@ -319,7 +317,7 @@ spec:
             hardware: CUDA sm_89
             quantization: Q8_0 (568M)
             max_input_tokens: 8192
-            notes: "Fleet's only rerank endpoint; always resident (RAG companion to qwen3-embed)"
+            notes: "Fleet's only rerank endpoint; always resident with startup warmup (RAG companion to qwen3-embed)"
       router_settings:
         num_retries: 2
         routing_strategy: simple-shuffle

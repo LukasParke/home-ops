@@ -223,6 +223,12 @@ spec:
                     description: Web terminal
                     namespace: default
                     app: termix
+                - Steel:
+                    icon: mdi-web
+                    href: https://steel.${SECRET_DOMAIN}
+                    description: Headless browser API for agents
+                    namespace: default
+                    app: steel
             - GitOps:
                 - Forgejo:
                     icon: forgejo.png

@@ -24,3 +24,4 @@ resources:
   - ./termix/ks.yaml
   - ./firecrawl/ks.yaml
   - ./litellm/ks.yaml
+  - ./steel/ks.yaml

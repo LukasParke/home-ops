@@ -1,0 +1,115 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: steel
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: steel
+  interval: 1h
+  values:
+    controllers:
+      steel:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/steel-dev/steel-browser-api
+              tag: latest@sha256:457e2a884d7d52e8a3cdbe2c1b0cdfcb99dc639bf9e5aff9a2b0a6f7f6a9e57d
+              pullPolicy: IfNotPresent
+            env:
+              DOMAIN: steel-api.${SECRET_DOMAIN}
+              CDP_DOMAIN: steel-cdp.${SECRET_DOMAIN}
+              LOG_STORAGE_ENABLED: "true"
+              LOG_STORAGE_PATH: /data/logs/browser-logs.duckdb
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                memory: 4Gi
+          ui:
+            image:
+              repository: ghcr.io/steel-dev/steel-browser-ui
+              tag: latest@sha256:9478993b5f028ad4a437ee1df19d74acc21118296a8a42a82a795865316c3372
+              pullPolicy: IfNotPresent
+            env:
+              API_URL: http://localhost:3000
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+    service:
+      app:
+        ports:
+          http:
+            port: 80
+          api:
+            port: 3000
+          cdp:
+            port: 9223
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "false"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 80
+      api:
+        annotations:
+          gethomepage.dev/enabled: "false"
+        hostnames: ["steel-api.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 3000
+      cdp:
+        annotations:
+          gethomepage.dev/enabled: "false"
+        hostnames: ["steel-cdp.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 9223
+    persistence:
+      logs:
+        type: emptyDir
+        advancedMounts:
+          steel:
+            app:
+              - path: /data/logs
+      exports:
+        type: emptyDir
+        advancedMounts:
+          steel:
+            app:
+              - path: /tmp/steel-browser-exports
+      cache:
+        type: emptyDir
+        advancedMounts:
+          steel:
+            app:
+              - path: /app/.cache
+      dshm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Gi
+        advancedMounts:
+          steel:
+            app:
+              - path: /dev/shm
