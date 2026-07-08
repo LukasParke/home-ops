@@ -135,7 +135,7 @@ spec:
             measured_prompt_tps_8k: "755"
             ttft_8k_cold: "~12s"
             quality: "5/5 on real-task suite; reasoning_effort=high"
-            notes: "Fleet quality flagship; resident (no swap latency)"
+            notes: "Fleet quality flagship; heavy group (loads on demand, evicts coder)"
         - model_name: gemma-4-26b-a4b
           litellm_params:
             <<: *cerberus
@@ -157,13 +157,13 @@ spec:
           model_info:
             supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
-            hardware: Radeon 8060S iGPU, Vulkan
+            hardware: Radeon 8060S iGPU, ROCm/HIP (gfx1151)
             quantization: UD-Q4_K_XL
             max_input_tokens: 131072
-            measured_generation_tps: "46-49"
-            measured_prompt_tps_8k: "489"
-            ttft_8k_cold: "~17s"
-            notes: "Terse agentic coder; sometimes skips requested unit tests"
+            measured_generation_tps: "41-49"
+            measured_prompt_tps_8k: "675"
+            ttft_8k_cold: "~12s"
+            notes: "Default model for cerberus (resident, HIP backend +33% prefill); terse agentic coder"
         - model_name: qwen3-235b-overnight
           litellm_params:
             <<: *cerberus
