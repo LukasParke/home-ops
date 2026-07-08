@@ -344,7 +344,11 @@ spec:
         memory: 2Gi
 
     migrationJob:
-      enabled: true
+      # Disabled: DB was already migrated on initial install (14d ago) and the
+      # chart version (litellm-helm@1.89.3) is unchanged — only proxy_config
+      # values differ. Prisma migration OOMs even at 4Gi; skip it to let the
+      # values-only upgrade through. Re-enable on chart version bumps.
+      enabled: false
       retries: 3
       backoffLimit: 4
       ttlSecondsAfterFinished: 120
