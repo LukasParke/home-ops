@@ -292,6 +292,28 @@ spec:
             quantization: Q4_K_M (dense, ~14GB)
             max_input_tokens: 8192
             notes: "Mistral Small 3.2 24B Instruct 2506; strong generalist. Default model for delphi"
+        - model_name: mistral-small-3.2-24b-vision
+          litellm_params:
+            <<: *delphi
+            model: openai/mistral-small-3.2-24b-vision
+          model_info:
+            supports_vision: true
+            host: delphi (RTX 4080 SUPER 16GB)
+            hardware: CUDA sm_89
+            quantization: Q3_K_M + mmproj F16 (~11.5GB)
+            max_input_tokens: 16384
+            notes: "Mistral Small 3.2 24B vision variant; use base64 data URLs for images (no HTTPS in llama-server)"
+        - model_name: deepseek-r1-14b
+          litellm_params:
+            <<: *delphi
+            model: openai/deepseek-r1-14b
+          model_info:
+            supports_vision: false
+            host: delphi (RTX 4080 SUPER 16GB)
+            hardware: CUDA sm_89
+            quantization: Q5_K_M (~9.8GB)
+            max_input_tokens: 32768
+            notes: "DeepSeek-R1-Distill-Qwen-14B; math/logic reasoning specialist with thinking trace"
         - model_name: bge-reranker-v2-m3
           litellm_params:
             <<: *delphi
