@@ -28,7 +28,7 @@ spec:
       enabled: true
     image:
       repository: ghcr.io/firecrawl/firecrawl
-      tag: latest@sha256:c92c5705fcc106e488be4b4279968a31602504bc641e93e9d5fe62ca13877423
+      tag: latest@sha256:2d24d8ba5961dcde15559357a3658e74ee75315d58fb897f4549618138c6f111
       pullPolicy: IfNotPresent
     playwright:
       repository: ghcr.io/firecrawl/playwright-service
