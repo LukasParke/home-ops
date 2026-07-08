@@ -136,20 +136,6 @@ spec:
             ttft_8k_cold: "~12s"
             quality: "5/5 on real-task suite; reasoning_effort=high"
             notes: "Fleet quality flagship; resident (no swap latency)"
-        - model_name: qwen3.6-35b
-          litellm_params:
-            <<: *cerberus
-            model: openai/qwen3.6-35b
-          model_info:
-            supports_vision: true
-            host: cerberus (Strix Halo, 128GB unified)
-            hardware: Radeon 8060S iGPU, Vulkan
-            quantization: Q8_0 + MTP speculative decoding
-            max_input_tokens: 131072
-            measured_generation_tps: "71-81 (vision requests ~70)"
-            measured_prompt_tps_8k: "809"
-            ttft_8k_cold: "~10s"
-            notes: "Highest-fidelity Qwen3.6; vision via mmproj (added 2026-07-07)"
         - model_name: gemma-4-26b-a4b
           litellm_params:
             <<: *cerberus
