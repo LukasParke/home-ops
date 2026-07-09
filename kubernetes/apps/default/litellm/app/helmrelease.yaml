@@ -130,7 +130,7 @@ spec:
             host: cerberus (Strix Halo, 128GB unified)
             hardware: Radeon 8060S iGPU, Vulkan
             quantization: MXFP4 (native)
-            max_input_tokens: 65536
+            max_input_tokens: 131072
             measured_generation_tps: "51-55"
             measured_prompt_tps_8k: "755"
             ttft_8k_cold: "~12s"
@@ -338,7 +338,8 @@ spec:
             supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
             role: "CEO/strategist — highest intelligence"
-            notes: "Alias for gpt-oss-120b; use for planning, architecture, strategy"
+            max_input_tokens: 131072
+            notes: "Alias for gpt-oss-120b; use for planning, architecture, strategy. reasoning_effort=medium"
         - model_name: coder-fast
           litellm_params:
             model: openai/gpt-oss-20b
