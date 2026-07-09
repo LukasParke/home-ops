@@ -163,7 +163,19 @@ spec:
             measured_generation_tps: "41-49"
             measured_prompt_tps_8k: "675"
             ttft_8k_cold: "~12s"
-            notes: "Default model for cerberus (resident, HIP backend +33% prefill); terse agentic coder"
+            notes: "Large agentic coder (HIP +33% prefill); swap lane with GLM-4.7-Flash resident"
+        - model_name: glm-4.7-flash
+          litellm_params:
+            <<: *cerberus
+            model: openai/glm-4.7-flash
+          model_info:
+            supports_vision: false
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: UD-Q4_K_XL (~18GB, ~3.6B active MoE)
+            max_input_tokens: 131072
+            measured_generation_tps: "~65 (Vulkan; HIP ~53, so Vulkan, 2026-07-09)"
+            notes: "Fast resident chat/agent/coder lane (2026-07-09); coexists with gemma-4-26b-a4b; exclusive heavy still evicts"
         - model_name: qwen3-235b-overnight
           litellm_params:
             <<: *cerberus
@@ -279,9 +291,9 @@ spec:
             measured_throughput: "33 docs/s (~250 tok each), dim 1024"
             notes: "Fleet's only embedding endpoint; always resident"
         # ── delphi — RTX 4080 SUPER 16GB, CUDA (sm_89); fills fleet gaps ──
-        - model_name: mistral-small-3.2-24b
+        - model_name: phi-4
           litellm_params: &delphi
-            model: openai/mistral-small-3.2-24b
+            model: openai/phi-4
             api_base: http://10.10.10.18:8080/v1
             api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
             timeout: 600
@@ -289,9 +301,21 @@ spec:
             supports_vision: false
             host: delphi (RTX 4080 SUPER 16GB)
             hardware: CUDA sm_89
-            quantization: Q4_K_M (dense, ~14GB)
-            max_input_tokens: 8192
-            notes: "Mistral Small 3.2 24B Instruct 2506; strong generalist. Default model for delphi"
+            quantization: Q5_K_M (~9.9GB)
+            max_input_tokens: 32768
+            measured_generation_tps: "~62"
+            notes: "NEW default for delphi (2026-07-09); ~62 t/s vs mistral IQ4_XS ~53 on same GPU"
+        - model_name: mistral-small-3.2-24b
+          litellm_params:
+            <<: *delphi
+            model: openai/mistral-small-3.2-24b
+          model_info:
+            supports_vision: false
+            host: delphi (RTX 4080 SUPER 16GB)
+            hardware: CUDA sm_89
+            quantization: IQ4_XS (dense, ~12GB; was Q4_K_M)
+            max_input_tokens: 16384
+            notes: "Mistral Small 3.2 24B quality generalist lane (not default)"
         - model_name: mistral-small-3.2-24b-vision
           litellm_params:
             <<: *delphi
@@ -350,7 +374,7 @@ spec:
             supports_vision: false
             host: talos (RTX 5090 32GB)
             role: "Fast execution — long-prompt/short-answer"
-            notes: "Alias for gpt-oss-20b; 350 t/s, fastest model in fleet"
+            notes: "Alias for gpt-oss-20b; ~395 t/s, fastest model in fleet"
         - model_name: coder-quality
           litellm_params:
             model: openai/ornith-35b
@@ -361,7 +385,7 @@ spec:
             supports_vision: false
             host: talos (RTX 5090 32GB)
             role: "High-quality coding — MoE+MTP"
-            notes: "Alias for ornith-35b; 324 t/s, 262k ctx, agentic coding specialist"
+            notes: "Alias for ornith-35b; ~342 t/s, 196k ctx (safe), agentic coding specialist"
         - model_name: coder-agentic
           litellm_params:
             model: openai/devstral-24b
@@ -397,15 +421,26 @@ spec:
             notes: "Alias for deepseek-r1-14b; 48.7 t/s, reasoning specialist"
         - model_name: general
           litellm_params:
-            model: openai/mistral-small-3.2-24b
+            model: openai/phi-4
             api_base: http://10.10.10.18:8080/v1
             api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
             timeout: 600
           model_info:
             supports_vision: false
             host: delphi (RTX 4080 SUPER 16GB)
-            role: "General chat — strong generalist"
-            notes: "Alias for mistral-small-3.2-24b; default model for delphi"
+            role: "General chat — fast default"
+            notes: "Alias for phi-4 (2026-07-09 retune); denser speed than mistral-24b on delphi"
+        - model_name: cerberus-fast
+          litellm_params:
+            model: openai/glm-4.7-flash
+            api_base: http://10.10.10.218:8080/v1
+            api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: cerberus (Strix Halo, 128GB unified)
+            role: "Fast resident MoE on cerberus — chat/agent/coder"
+            notes: "Alias for glm-4.7-flash; ~3.6B active, interactive default"
         - model_name: vision
           litellm_params:
             model: openai/gemma-4-12b
