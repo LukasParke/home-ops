@@ -326,6 +326,107 @@ spec:
             quantization: Q8_0 (568M)
             max_input_tokens: 8192
             notes: "Fleet's only rerank endpoint; always resident with startup warmup (RAG companion to qwen3-embed)"
+        # ── Virtual aliases (role-based routing) ──
+        # Agents reference roles, not specific models. Hot-swap without code changes.
+        - model_name: planner
+          litellm_params: &planner
+            model: openai/gpt-oss-120b
+            api_base: http://10.10.10.218:8080/v1
+            api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: cerberus (Strix Halo, 128GB unified)
+            role: "CEO/strategist — highest intelligence"
+            notes: "Alias for gpt-oss-120b; use for planning, architecture, strategy"
+        - model_name: coder-fast
+          litellm_params:
+            model: openai/gpt-oss-20b
+            api_base: http://10.10.10.81:8080/v1
+            api_key: os.environ/TALOS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: talos (RTX 5090 32GB)
+            role: "Fast execution — long-prompt/short-answer"
+            notes: "Alias for gpt-oss-20b; 350 t/s, fastest model in fleet"
+        - model_name: coder-quality
+          litellm_params:
+            model: openai/ornith-35b
+            api_base: http://10.10.10.81:8080/v1
+            api_key: os.environ/TALOS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: talos (RTX 5090 32GB)
+            role: "High-quality coding — MoE+MTP"
+            notes: "Alias for ornith-35b; 324 t/s, 262k ctx, agentic coding specialist"
+        - model_name: coder-agentic
+          litellm_params:
+            model: openai/devstral-24b
+            api_base: http://10.10.10.81:8080/v1
+            api_key: os.environ/TALOS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: talos (RTX 5090 32GB)
+            role: "Agentic coding — multi-file edits"
+            notes: "Alias for devstral-24b; Mistral Devstral 2, purpose-built for agentic coding"
+        - model_name: coder-small
+          litellm_params:
+            model: openai/ornith-9b
+            api_base: http://10.10.10.65:8080/v1
+            api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: hephaestus (RTX 3080 10GB)
+            role: "Quick tasks — DFlash spec-decode"
+            notes: "Alias for ornith-9b; 136 t/s, fast, fully VRAM-resident"
+        - model_name: reasoning
+          litellm_params:
+            model: openai/deepseek-r1-14b
+            api_base: http://10.10.10.18:8080/v1
+            api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: delphi (RTX 4080 SUPER 16GB)
+            role: "Math/logic — thinking trace"
+            notes: "Alias for deepseek-r1-14b; 48.7 t/s, reasoning specialist"
+        - model_name: general
+          litellm_params:
+            model: openai/mistral-small-3.2-24b
+            api_base: http://10.10.10.18:8080/v1
+            api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: false
+            host: delphi (RTX 4080 SUPER 16GB)
+            role: "General chat — strong generalist"
+            notes: "Alias for mistral-small-3.2-24b; default model for delphi"
+        - model_name: vision
+          litellm_params:
+            model: openai/gemma-4-12b
+            api_base: http://10.10.10.65:8080/v1
+            api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
+            timeout: 600
+          model_info:
+            supports_vision: true
+            host: hephaestus (RTX 3080 10GB)
+            role: "Image understanding — MTP+vision"
+            notes: "Alias for gemma-4-12b; 136 t/s, fast vision model"
+        - model_name: overnight
+          litellm_params:
+            model: openai/qwen3-235b-overnight
+            api_base: http://10.10.10.218:8080/v1
+            api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
+            timeout: 1200
+          model_info:
+            supports_vision: false
+            host: cerberus (Strix Halo, 128GB unified)
+            role: "Overnight max-quality batch"
+            notes: "Alias for qwen3-235b-overnight; 17.5 t/s, 5/5 quality, runs alone (exclusive group)"
       router_settings:
         num_retries: 2
         routing_strategy: simple-shuffle
