@@ -17,6 +17,16 @@ spec:
               repository: ghcr.io/steel-dev/steel-browser-api
               tag: latest@sha256:457e2a884d7d52e8a3cdbe2c1b0cdfcb99dc639bf9e5aff9a2b0a6f7f6a9e57d
               pullPolicy: IfNotPresent
+            # TODO: remove command override once upstream rebuilds the image with
+            # chromium >= 150.0.7871.100. The baked-in 150.0.7871.46 crashes on
+            # startup with SIGTRAP (Debian bug #1141488), breaking all sessions.
+            command:
+              - /bin/sh
+              - -c
+              - |
+                apt-get update -qq && apt-get install -y --only-upgrade \
+                  chromium chromium-common chromium-sandbox chromium-driver
+                exec /app/api/entrypoint.sh
             env:
               DOMAIN: steel-api.${SECRET_DOMAIN}
               CDP_DOMAIN: steel-cdp.${SECRET_DOMAIN}
