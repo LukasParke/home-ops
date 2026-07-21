@@ -474,6 +474,8 @@ spec:
         ui_password: os.environ/LITELLM_UI_PASSWORD
         enable_jwt_auth: false
       litellm_settings:
+        callbacks:
+          - prometheus
         drop_params: true
         set_verbose: false
 
