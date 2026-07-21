@@ -527,7 +527,9 @@ spec:
           memory: 4Gi
 
     serviceMonitor:
-      enabled: true
+      # LiteLLM protects /metrics with the proxy master key. A custom
+      # ServiceMonitor supplies it from cluster-secrets.
+      enabled: false
       interval: 15s
       scrapeTimeout: 10s
 

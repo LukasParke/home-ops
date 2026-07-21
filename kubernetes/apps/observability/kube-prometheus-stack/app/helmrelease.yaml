@@ -86,10 +86,10 @@ spec:
           routes:
             - matchers:
                 - alertname="Watchdog"
-              receiver: null
+              receiver: "null"
         receivers:
           - name: default
-          - name: null
+          - name: "null"
       alertmanagerSpec:
         replicas: 1
         resources:

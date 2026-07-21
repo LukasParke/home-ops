@@ -1,0 +1,27 @@
+---
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: cluster
+spec:
+  talos:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.13.6
+  talosctl:
+    image:
+      tag: v1.13.6
+  maintenance:
+    windows:
+      - start: "0 2 * * 0"
+        duration: 4h
+        timezone: America/Chicago
+  drain:
+    deleteLocalData: true
+    ignoreDaemonSets: true
+  policy:
+    debug: false
+    force: false
+    placement: hard
+    rebootMode: default
+    stage: false
+    timeout: 30m

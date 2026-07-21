@@ -6,3 +6,4 @@ resources:
   - ./cluster-postgres.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
+  - ./servicemonitor.yaml
