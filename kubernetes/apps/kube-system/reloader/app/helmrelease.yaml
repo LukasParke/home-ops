@@ -11,6 +11,10 @@ spec:
   values:
     fullnameOverride: reloader
     reloader:
+      deployment:
+        resources:
+          requests:
+            memory: 64Mi
       readOnlyRootFileSystem: true
       podMonitor:
         enabled: true

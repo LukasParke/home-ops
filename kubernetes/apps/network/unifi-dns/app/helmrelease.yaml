@@ -11,12 +11,18 @@ spec:
   interval: 1h
   values:
     fullnameOverride: *app
+    resources:
+      requests:
+        memory: 64Mi
     # Gateways (envoy-external / envoy-internal) are in this namespace; HTTPRoutes attach from other namespaces.
     gatewayNamespace: network
     logLevel: info
     provider:
       name: webhook
       webhook:
+        resources:
+          requests:
+            memory: 64Mi
         image:
           repository: ghcr.io/kashalls/external-dns-unifi-webhook
           tag: v0.8.2@sha256:7f0ddbbc83a36a2a9d762e25eef9cafcb3adf0493068a27d72ae71087eafe6f0

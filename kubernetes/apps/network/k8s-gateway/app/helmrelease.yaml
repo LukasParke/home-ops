@@ -13,6 +13,9 @@ spec:
     domain: "${SECRET_DOMAIN}"
     replicaCount: 2
     ttl: 1
+    resources:
+      requests:
+        memory: 32Mi
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname

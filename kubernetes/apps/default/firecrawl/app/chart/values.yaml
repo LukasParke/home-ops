@@ -104,10 +104,16 @@ playwright:
   tag: "latest@sha256:d84e22d726d16f2607c898abdb49d1c34239ed1b6181335e3531a6031f45423f"
   pullPolicy: Always
   replicaCount: 1
+  resources:
+    requests:
+      memory: 512Mi
 
 redis:
   image: redis:alpine
   replicaCount: 1
+  resources:
+    requests:
+      memory: 64Mi
 
 service:
   api:

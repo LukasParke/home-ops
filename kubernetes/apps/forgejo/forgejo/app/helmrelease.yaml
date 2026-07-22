@@ -10,6 +10,9 @@ spec:
     kind: OCIRepository
     name: forgejo
   values:
+    resources:
+      requests:
+        memory: 256Mi
     global:
       storageClass: nfs
     persistence:

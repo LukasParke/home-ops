@@ -17,6 +17,13 @@ spec:
           existingClaim: immich-library
     valkey:
       enabled: true
+      controllers:
+        main:
+          containers:
+            main:
+              resources:
+                requests:
+                  memory: 128Mi
       persistence:
         data:
           enabled: true
@@ -61,6 +68,11 @@ spec:
       controllers:
         main:
           strategy: Recreate
+          containers:
+            main:
+              resources:
+                requests:
+                  memory: 512Mi
       persistence:
         cache:
           enabled: true

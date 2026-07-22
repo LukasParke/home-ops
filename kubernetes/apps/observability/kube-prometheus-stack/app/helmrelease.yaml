@@ -58,8 +58,15 @@ spec:
         interval: 30s
     nodeExporter:
       enabled: true
+    prometheus-node-exporter:
+      resources:
+        requests:
+          memory: 32Mi
     prometheus:
       prometheusSpec:
+        configReloaderResources:
+          requests:
+            memory: 32Mi
         retention: 15d
         replicas: 1
         resources:
@@ -91,6 +98,9 @@ spec:
           - name: default
           - name: "null"
       alertmanagerSpec:
+        configReloaderResources:
+          requests:
+            memory: 32Mi
         replicas: 1
         resources:
           requests:
@@ -105,6 +115,9 @@ spec:
       ingress:
         enabled: false
       sidecar:
+        resources:
+          requests:
+            memory: 32Mi
         dashboards:
           enabled: true
         datasources:
@@ -122,3 +135,7 @@ spec:
           memory: 128Mi
         limits:
           memory: 512Mi
+    kube-state-metrics:
+      resources:
+        requests:
+          memory: 64Mi

@@ -9,6 +9,9 @@ spec:
     name: cilium
   interval: 1h
   values:
+    resources:
+      requests:
+        memory: 256Mi
     bpf:
       masquerade: true
       hostLegacyRouting: false
@@ -62,6 +65,9 @@ spec:
     localRedirectPolicies:
       enabled: true
     operator:
+      resources:
+        requests:
+          memory: 128Mi
       dashboards:
         enabled: true
       prometheus:

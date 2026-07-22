@@ -14,6 +14,17 @@ spec:
     replicaCount: 1
     dns01RecursiveNameservers: https://1.1.1.1:443/dns-query,https://1.0.0.1:443/dns-query
     dns01RecursiveNameserversOnly: true
+    resources:
+      requests:
+        memory: 64Mi
+    webhook:
+      resources:
+        requests:
+          memory: 32Mi
+    cainjector:
+      resources:
+        requests:
+          memory: 64Mi
     prometheus:
       enabled: true
       servicemonitor:

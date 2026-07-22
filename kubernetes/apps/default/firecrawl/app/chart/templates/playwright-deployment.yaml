@@ -22,6 +22,8 @@ spec:
         - name: playwright-service
           image: "{{ .Values.playwright.repository }}:{{ .Values.playwright.tag }}"
           imagePullPolicy: {{ .Values.playwright.pullPolicy }}
+          resources:
+            {{- toYaml .Values.playwright.resources | nindent 12 }}
           ports:
             - containerPort: {{ .Values.service.playwright.port }}
           envFrom:
