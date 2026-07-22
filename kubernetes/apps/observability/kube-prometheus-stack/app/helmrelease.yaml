@@ -64,9 +64,6 @@ spec:
           memory: 32Mi
     prometheus:
       prometheusSpec:
-        configReloaderResources:
-          requests:
-            memory: 32Mi
         retention: 15d
         replicas: 1
         resources:
@@ -98,9 +95,6 @@ spec:
           - name: default
           - name: "null"
       alertmanagerSpec:
-        configReloaderResources:
-          requests:
-            memory: 32Mi
         replicas: 1
         resources:
           requests:
@@ -129,6 +123,10 @@ spec:
         limits:
           memory: 512Mi
     prometheusOperator:
+      prometheusConfigReloader:
+        resources:
+          requests:
+            memory: 32Mi
       resources:
         requests:
           cpu: 50m
