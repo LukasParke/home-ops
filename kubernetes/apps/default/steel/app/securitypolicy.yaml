@@ -1,0 +1,35 @@
+---
+# Gateway-level API key auth for the public Steel API route.
+#
+# Steel ships no authentication of its own, so without this the public route
+# would be an open remote-browser proxy: an anonymous caller could scrape
+# in-cluster services (confirmed against firecrawl-api.default.svc), probe the
+# LAN, and burn cluster CPU rendering arbitrary pages.
+#
+# Enforced by Envoy before the request reaches the pod. Accepts either
+#   x-api-key: <key>
+#   Authorization: Bearer <key>
+# The stored secret value carries no "Bearer " prefix (Envoy compares the
+# extracted value directly); the Bearer form works because Envoy strips the
+# scheme when extracting from Authorization.
+#
+# Targets ONLY the external HTTPRoute, so the internal route stays key-free for
+# on-network/VPN use.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: steel-api-external
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: steel-api-external
+  apiKeyAuth:
+    credentialRefs:
+      - group: ""
+        kind: Secret
+        name: steel-apikeys
+    extractFrom:
+      - headers:
+          - x-api-key
+          - authorization
