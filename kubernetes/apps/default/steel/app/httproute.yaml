@@ -1,0 +1,37 @@
+---
+# Public route for the Steel API.
+#
+# Only the REST API (:3000) is published. The UI (:80) and the raw CDP
+# endpoint (:9223) stay on envoy-internal deliberately:
+#
+#   - CDP is remote code execution by design. Anyone who can reach it drives
+#     the browser directly, with no per-request auth to attach.
+#   - the UI has no login of its own.
+#
+# Published on a DISTINCT hostname (steel-browser.<domain>) rather than reusing
+# steel-api.<domain>: that name already resolves to the internal gateway, and
+# external-dns derives records from HTTPRoute hostnames, so dual-homing one name
+# across both gateways would produce conflicting targets (internal vs external).
+# Internal callers keep using steel-api.<domain> with no key.
+#
+# The API itself has no built-in authentication either, and a headless browser
+# is a general-purpose fetcher: an unauthenticated /v1/scrape is an open SSRF
+# proxy into the cluster (verified — it can read http://*.svc.cluster.local).
+# So this route is gated by the SecurityPolicy in securitypolicy.yaml, which
+# requires an API key at the gateway before traffic ever reaches the pod.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: steel-api-external
+  annotations:
+    gethomepage.dev/enabled: "false"
+spec:
+  hostnames: ["steel-browser.${SECRET_DOMAIN}"]
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: steel
+          port: 3000
