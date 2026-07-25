@@ -93,7 +93,17 @@ spec:
             namespace: network
             sectionName: https
         rules:
-          - backendRefs:
+          # Chromium refuses DevTools requests whose Host header is neither an
+          # IP nor localhost, and Steel's bundled nginx forwards Host verbatim
+          # (proxy_set_header Host $host), so CDP over the gateway returned
+          # "Host header is specified and is not an IP address or localhost."
+          # Rewrite the authority to localhost at the gateway so Playwright /
+          # puppeteer / raw CDP can attach from off-cluster.
+          - filters:
+              - type: URLRewrite
+                urlRewrite:
+                  hostname: localhost
+            backendRefs:
               - identifier: app
                 port: 9223
     persistence:
