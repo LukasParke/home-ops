@@ -11,13 +11,13 @@ spec:
   values:
     controllers:
       cloudflare-tunnel:
-        replicas: 2
+        replicas: 3
         strategy: RollingUpdate
         rollingUpdate:
           surge: 1
-          unavailable: 1
+          unavailable: 0
         podDisruptionBudget:
-          minAvailable: 1
+          minAvailable: 2
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -28,25 +28,21 @@ spec:
             env:
               NO_AUTOUPDATE: true
               TUNNEL_METRICS: 0.0.0.0:8080
-              TUNNEL_POST_QUANTUM: true # disable when using http2
-              TUNNEL_TRANSPORT_PROTOCOL: quic # or http2
             envFrom:
               - secretRef:
                   name: cloudflare-tunnel-secret
             args: ["tunnel", "run"]
             probes:
-              liveness: &probes
+              readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /ready
                     port: &port 8080
-                  initialDelaySeconds: 0
                   periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
+                  timeoutSeconds: 3
+                  failureThreshold: 6
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -61,7 +57,7 @@ spec:
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
+          whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
               app.kubernetes.io/controller: cloudflare-tunnel
