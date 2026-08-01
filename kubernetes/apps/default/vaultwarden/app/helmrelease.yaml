@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: docker.io/vaultwarden/server
-              tag: 1.37.0-alpine
+              tag: 1.37.1-alpine
             env:
               DOMAIN: "https://vault.${SECRET_DOMAIN}"
               DATA_FOLDER: /data
