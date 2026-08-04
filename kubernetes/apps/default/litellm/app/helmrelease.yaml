@@ -232,18 +232,6 @@ spec:
             max_input_tokens: 196608
             measured_generation_tps: "365"
             notes: "Agentic-coding specialist (DeepReinforce Ornith 1.0)"
-        - model_name: gpt-oss-20b
-          litellm_params:
-            <<: *talos
-            model: openai/gpt-oss-20b
-          model_info:
-            supports_vision: false
-            host: talos (RTX 5090 32GB)
-            hardware: CUDA sm_120
-            quantization: MXFP4 (native)
-            max_input_tokens: 131072
-            measured_generation_tps: "354"
-            notes: "Fastest model in the fleet; ideal for long-prompt/short-answer"
         - model_name: qwen3.6-27b-dense
           litellm_params:
             <<: *talos
