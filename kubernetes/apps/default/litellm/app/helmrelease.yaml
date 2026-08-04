@@ -131,8 +131,32 @@ spec:
             hardware: Radeon 8060S iGPU, ROCm/HIP (gfx1151)
             quantization: UD-Q3_K_XL (230B-A10B MoE, ~94GB)
             max_input_tokens: 32768
-            measured_generation_tps: "25-29"
+            measured_generation_tps: "28"
             notes: "Primary heavy model; resident, HIP backend. Reasons by default — needs generous max_tokens."
+        - model_name: mistral-small-4
+          litellm_params:
+            <<: *cerberus
+            model: openai/mistral-small-4
+          model_info:
+            supports_vision: true
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, Vulkan
+            quantization: UD-Q4_K_XL (119B MoE, 6.5B active, ~69GB)
+            max_input_tokens: 131072
+            measured_generation_tps: "36"
+            notes: "Apache 2.0; vision+reasoning+coding in one model"
+        - model_name: gpt-oss-120b
+          litellm_params:
+            <<: *cerberus
+            model: openai/gpt-oss-120b
+          model_info:
+            supports_vision: false
+            host: cerberus (Strix Halo, 128GB unified)
+            hardware: Radeon 8060S iGPU, ROCm/HIP (gfx1151)
+            quantization: MXFP4 (native, ~63GB)
+            max_input_tokens: 131072
+            measured_generation_tps: "47"
+            notes: "Reasoning model; re-added 2026-08-04 without EAGLE-3"
         - model_name: gemma-4-26b-a4b
           litellm_params:
             <<: *cerberus
@@ -141,12 +165,10 @@ spec:
             supports_vision: true
             host: cerberus (Strix Halo, 128GB unified)
             hardware: Radeon 8060S iGPU, Vulkan
-            quantization: QAT UD-Q4_K_XL + MTP head (~80% acceptance)
+            quantization: QAT Q4XL + MTP + mmproj
             max_input_tokens: 65536
-            measured_generation_tps: "72-98"
-            measured_prompt_tps_8k: "854"
-            ttft_8k_cold: "~10s"
-            notes: "Vision MoE (4B active); coexists with gpt-oss-120b, fast swaps"
+            measured_generation_tps: "94"
+            notes: "Vision MoE A4B; coexists with coder"
         - model_name: qwen3-coder-next-80b
           litellm_params:
             <<: *cerberus
@@ -157,10 +179,8 @@ spec:
             hardware: Radeon 8060S iGPU, ROCm/HIP (gfx1151)
             quantization: UD-Q4_K_XL
             max_input_tokens: 131072
-            measured_generation_tps: "41-49"
-            measured_prompt_tps_8k: "675"
-            ttft_8k_cold: "~12s"
-            notes: "Large agentic coder (HIP +33% prefill); swap lane with GLM-4.7-Flash resident"
+            measured_generation_tps: "38"
+            notes: "Large agentic coder (HIP)"
         - model_name: glm-4.7-flash
           litellm_params:
             <<: *cerberus
@@ -171,8 +191,8 @@ spec:
             hardware: Radeon 8060S iGPU, Vulkan
             quantization: UD-Q4_K_XL (~18GB, ~3.6B active MoE)
             max_input_tokens: 131072
-            measured_generation_tps: "~65 (Vulkan; HIP ~53, so Vulkan, 2026-07-09)"
-            notes: "Fast resident chat/agent/coder lane (2026-07-09); coexists with gemma-4-26b-a4b; exclusive heavy still evicts"
+            measured_generation_tps: "64"
+            notes: "Fast resident chat/agent/coder lane"
         # ── talos — RTX 5090 32GB, CUDA (sm_120) ──
         - model_name: qwen3.6-35b-a3b
           litellm_params: &talos
@@ -184,10 +204,10 @@ spec:
             supports_vision: true
             host: talos (RTX 5090 32GB)
             hardware: CUDA sm_120
-            quantization: UD-Q4_K_XL + MTP speculative decoding
-            max_input_tokens: 196608
-            measured_generation_tps: "~317 (vision spot-test)"
-            notes: "Fleet's fastest Qwen3.6; vision via mmproj. Context bumped to 196608"
+            quantization: UD-IQ4_XS + MTP speculative decoding
+            max_input_tokens: 262144
+            measured_generation_tps: "349"
+            notes: "Fleet's fastest Qwen3.6; vision via mmproj"
         - model_name: devstral-24b
           litellm_params:
             <<: *talos
@@ -198,7 +218,8 @@ spec:
             hardware: CUDA sm_120
             quantization: Q4_K_M (Devstral 2, 24B dense)
             max_input_tokens: 153600
-            notes: "Agentic coding specialist (Mistral Devstral-Small-2). Max context tuned for 32GB VRAM"
+            measured_generation_tps: "96"
+            notes: "Agentic coding specialist (Mistral Devstral-Small-2)"
         - model_name: ornith-35b
           litellm_params:
             <<: *talos
@@ -209,10 +230,8 @@ spec:
             hardware: CUDA sm_120
             quantization: APEX-I-Quality + MTP speculative decoding
             max_input_tokens: 196608
-            measured_generation_tps: "291-341"
-            measured_prompt_tps_8k: "9356"
-            ttft_8k_cold: "~1s"
-            notes: "Agentic-coding specialist (DeepReinforce Ornith 1.0). Context bumped to 196608"
+            measured_generation_tps: "365"
+            notes: "Agentic-coding specialist (DeepReinforce Ornith 1.0)"
         - model_name: gpt-oss-20b
           litellm_params:
             <<: *talos
@@ -223,10 +242,44 @@ spec:
             hardware: CUDA sm_120
             quantization: MXFP4 (native)
             max_input_tokens: 131072
-            measured_generation_tps: "352-390"
-            measured_prompt_tps_8k: "23306"
-            ttft_8k_cold: "~0.3s"
+            measured_generation_tps: "354"
             notes: "Fastest model in the fleet; ideal for long-prompt/short-answer"
+        - model_name: qwen3.6-27b-dense
+          litellm_params:
+            <<: *talos
+            model: openai/qwen3.6-27b-dense
+          model_info:
+            supports_vision: false
+            host: talos (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: IQ4_XS
+            max_input_tokens: 262144
+            measured_generation_tps: "81"
+            notes: "SWE-bench Verified 77.2; best dense coding model"
+        - model_name: qwen3.6-27b-nvfp4
+          litellm_params:
+            <<: *talos
+            model: openai/qwen3.6-27b-nvfp4
+          model_info:
+            supports_vision: false
+            host: talos (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: NVFP4 + MTP
+            max_input_tokens: 262144
+            measured_generation_tps: "78"
+            notes: "FP4 path; slower than IQ4_XS"
+        - model_name: qwen3.6-35b-a3b-nvfp4
+          litellm_params:
+            <<: *talos
+            model: openai/qwen3.6-35b-a3b-nvfp4
+          model_info:
+            supports_vision: false
+            host: talos (RTX 5090 32GB)
+            hardware: CUDA sm_120
+            quantization: NVFP4 + MTP
+            max_input_tokens: 262144
+            measured_generation_tps: "192"
+            notes: "FP4 path; slower than IQ4_XS+MTP"
         # ── hephaestus — RTX 3080 10GB, CUDA (sm_86) ──
         - model_name: ornith-9b
           litellm_params: &hephaestus
@@ -238,11 +291,9 @@ spec:
             supports_vision: false
             host: hephaestus (RTX 3080 10GB)
             hardware: CUDA sm_86
-            quantization: Q5_K_M + DFlash speculative decoding (~76% acceptance)
+            quantization: Q5_K_M + DFlash speculative decoding (~67% acceptance)
             max_input_tokens: 16384
-            measured_generation_tps: "124-160"
-            measured_prompt_tps_8k: "2183"
-            ttft_8k_cold: "~4s"
+            measured_generation_tps: "122"
             notes: "Fast agentic coding; fully VRAM-resident"
         - model_name: gemma-4-12b
           litellm_params:
@@ -252,12 +303,10 @@ spec:
             supports_vision: true
             host: hephaestus (RTX 3080 10GB)
             hardware: CUDA sm_86
-            quantization: QAT UD-Q4_K_XL + MTP head (~78% acceptance)
+            quantization: QAT UD-Q4_K_XL + MTP head (~89% acceptance)
             max_input_tokens: 16384
-            measured_generation_tps: "116-175"
-            measured_prompt_tps_8k: "2354"
-            ttft_8k_cold: "~4s"
-            notes: "Fast vision model; fully VRAM-resident (added 2026-07-07)"
+            measured_generation_tps: "153"
+            notes: "Fast vision model; fully VRAM-resident"
         - model_name: qwen3-embed
           litellm_params:
             <<: *hephaestus
@@ -284,8 +333,20 @@ spec:
             hardware: CUDA sm_89
             quantization: Q5_K_M (~9.9GB)
             max_input_tokens: 32768
-            measured_generation_tps: "~62"
-            notes: "NEW default for delphi (2026-07-09); ~62 t/s vs mistral IQ4_XS ~53 on same GPU"
+            measured_generation_tps: "60"
+            notes: "Backup generalist"
+        - model_name: gpt-oss-20b
+          litellm_params:
+            <<: *delphi
+            model: openai/gpt-oss-20b
+          model_info:
+            supports_vision: false
+            host: delphi (RTX 4080 SUPER 16GB)
+            hardware: CUDA sm_89
+            quantization: MXFP4 (native)
+            max_input_tokens: 131072
+            measured_generation_tps: "189"
+            notes: "Fastest on delphi; Apache 2.0 MoE"
         - model_name: mistral-small-3.2-24b
           litellm_params:
             <<: *delphi
@@ -294,9 +355,10 @@ spec:
             supports_vision: false
             host: delphi (RTX 4080 SUPER 16GB)
             hardware: CUDA sm_89
-            quantization: IQ4_XS (dense, ~12GB; was Q4_K_M)
+            quantization: IQ4_XS (dense, ~12GB)
             max_input_tokens: 16384
-            notes: "Mistral Small 3.2 24B quality generalist lane (not default)"
+            measured_generation_tps: "50"
+            notes: "Mistral Small 3.2 24B quality generalist lane"
         - model_name: mistral-small-3.2-24b-vision
           litellm_params:
             <<: *delphi
@@ -318,6 +380,7 @@ spec:
             hardware: CUDA sm_89
             quantization: Q5_K_M (~9.8GB)
             max_input_tokens: 32768
+            measured_generation_tps: "61"
             notes: "DeepSeek-R1-Distill-Qwen-14B; math/logic reasoning specialist with thinking trace"
         - model_name: bge-reranker-v2-m3
           litellm_params:
@@ -331,119 +394,6 @@ spec:
             quantization: Q8_0 (568M)
             max_input_tokens: 8192
             notes: "Fleet's only rerank endpoint; always resident with startup warmup (RAG companion to qwen3-embed)"
-        # ── Virtual aliases (role-based routing) ──
-        # Agents reference roles, not specific models. Hot-swap without code changes.
-        - model_name: planner
-          litellm_params: &planner
-            model: openai/minimax-m2.1
-            api_base: http://10.10.10.218:8080/v1
-            api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: cerberus (Strix Halo, 128GB unified)
-            role: "CEO/strategist — highest intelligence"
-            max_input_tokens: 32768
-            notes: "Alias for minimax-m2.1; use for planning, architecture, strategy. Reasons by default — needs generous max_tokens."
-        - model_name: coder-fast
-          litellm_params:
-            model: openai/gpt-oss-20b
-            api_base: http://10.10.10.81:8080/v1
-            api_key: os.environ/TALOS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: talos (RTX 5090 32GB)
-            role: "Fast execution — long-prompt/short-answer"
-            notes: "Alias for gpt-oss-20b; ~395 t/s, fastest model in fleet"
-        - model_name: coder-quality
-          litellm_params:
-            model: openai/ornith-35b
-            api_base: http://10.10.10.81:8080/v1
-            api_key: os.environ/TALOS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: talos (RTX 5090 32GB)
-            role: "High-quality coding — MoE+MTP"
-            notes: "Alias for ornith-35b; ~342 t/s, 196k ctx (safe), agentic coding specialist"
-        - model_name: coder-agentic
-          litellm_params:
-            model: openai/devstral-24b
-            api_base: http://10.10.10.81:8080/v1
-            api_key: os.environ/TALOS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: talos (RTX 5090 32GB)
-            role: "Agentic coding — multi-file edits"
-            notes: "Alias for devstral-24b; Mistral Devstral 2, purpose-built for agentic coding"
-        - model_name: coder-small
-          litellm_params:
-            model: openai/ornith-9b
-            api_base: http://10.10.10.65:8080/v1
-            api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: hephaestus (RTX 3080 10GB)
-            role: "Quick tasks — DFlash spec-decode"
-            notes: "Alias for ornith-9b; 136 t/s, fast, fully VRAM-resident"
-        - model_name: reasoning
-          litellm_params:
-            model: openai/deepseek-r1-14b
-            api_base: http://10.10.10.18:8080/v1
-            api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: delphi (RTX 4080 SUPER 16GB)
-            role: "Math/logic — thinking trace"
-            notes: "Alias for deepseek-r1-14b; 48.7 t/s, reasoning specialist"
-        - model_name: general
-          litellm_params:
-            model: openai/phi-4
-            api_base: http://10.10.10.18:8080/v1
-            api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: delphi (RTX 4080 SUPER 16GB)
-            role: "General chat — fast default"
-            notes: "Alias for phi-4 (2026-07-09 retune); denser speed than mistral-24b on delphi"
-        - model_name: cerberus-fast
-          litellm_params:
-            model: openai/glm-4.7-flash
-            api_base: http://10.10.10.218:8080/v1
-            api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: false
-            host: cerberus (Strix Halo, 128GB unified)
-            role: "Fast resident MoE on cerberus — chat/agent/coder"
-            notes: "Alias for glm-4.7-flash; ~3.6B active, interactive default"
-        - model_name: vision
-          litellm_params:
-            model: openai/gemma-4-12b
-            api_base: http://10.10.10.65:8080/v1
-            api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
-            timeout: 600
-          model_info:
-            supports_vision: true
-            host: hephaestus (RTX 3080 10GB)
-            role: "Image understanding — MTP+vision"
-            notes: "Alias for gemma-4-12b; 136 t/s, fast vision model"
-        - model_name: overnight
-          litellm_params:
-            model: openai/minimax-m2.1
-            api_base: http://10.10.10.218:8080/v1
-            api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
-            timeout: 1200
-          model_info:
-            supports_vision: false
-            host: cerberus (Strix Halo, 128GB unified)
-            role: "Overnight max-quality batch"
-            notes: "Alias for minimax-m2.1; 230B MoE, runs alone (exclusive group)"
       router_settings:
         num_retries: 2
         routing_strategy: simple-shuffle
