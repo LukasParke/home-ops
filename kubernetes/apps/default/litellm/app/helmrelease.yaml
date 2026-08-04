@@ -119,23 +119,20 @@ spec:
       # qwen3.6-35b-fast retired (talos's qwen3.6-35b-a3b dominates it).
       model_list:
         # ── cerberus — Strix Halo (Ryzen AI MAX+ 395), 128GB unified, Vulkan ──
-        - model_name: gpt-oss-120b
+        - model_name: minimax-m2.1
           litellm_params: &cerberus
-            model: openai/gpt-oss-120b
+            model: openai/minimax-m2.1
             api_base: http://10.10.10.218:8080/v1
             api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
             timeout: 600
           model_info:
             supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
-            hardware: Radeon 8060S iGPU, Vulkan
-            quantization: MXFP4 (native)
-            max_input_tokens: 131072
-            measured_generation_tps: "51-55"
-            measured_prompt_tps_8k: "755"
-            ttft_8k_cold: "~12s"
-            quality: "5/5 on real-task suite; reasoning_effort=high"
-            notes: "Fleet quality flagship; heavy group (loads on demand, evicts coder)"
+            hardware: Radeon 8060S iGPU, ROCm/HIP (gfx1151)
+            quantization: UD-Q3_K_XL (230B-A10B MoE, ~94GB)
+            max_input_tokens: 32768
+            measured_generation_tps: "25-29"
+            notes: "Primary heavy model; resident, HIP backend. Reasons by default — needs generous max_tokens."
         - model_name: gemma-4-26b-a4b
           litellm_params:
             <<: *cerberus
@@ -176,22 +173,6 @@ spec:
             max_input_tokens: 131072
             measured_generation_tps: "~65 (Vulkan; HIP ~53, so Vulkan, 2026-07-09)"
             notes: "Fast resident chat/agent/coder lane (2026-07-09); coexists with gemma-4-26b-a4b; exclusive heavy still evicts"
-        - model_name: qwen3-235b-overnight
-          litellm_params:
-            <<: *cerberus
-            model: openai/qwen3-235b-overnight
-            timeout: 1200
-          model_info:
-            supports_vision: false
-            host: cerberus (Strix Halo, 128GB unified)
-            hardware: Radeon 8060S iGPU, Vulkan
-            quantization: UD-Q3_K_XL (97GB)
-            max_input_tokens: 32768
-            measured_generation_tps: "15-17"
-            measured_prompt_tps_8k: "104-165"
-            ttft_8k_cold: "~80s"
-            quality: "Only perfect 5/5 sweep in the fleet"
-            notes: "Batch/overnight only — evicts other cerberus models while loaded"
         # ── talos — RTX 5090 32GB, CUDA (sm_120) ──
         - model_name: qwen3.6-35b-a3b
           litellm_params: &talos
@@ -354,7 +335,7 @@ spec:
         # Agents reference roles, not specific models. Hot-swap without code changes.
         - model_name: planner
           litellm_params: &planner
-            model: openai/gpt-oss-120b
+            model: openai/minimax-m2.1
             api_base: http://10.10.10.218:8080/v1
             api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
             timeout: 600
@@ -362,8 +343,8 @@ spec:
             supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
             role: "CEO/strategist — highest intelligence"
-            max_input_tokens: 131072
-            notes: "Alias for gpt-oss-120b; use for planning, architecture, strategy. reasoning_effort=medium"
+            max_input_tokens: 32768
+            notes: "Alias for minimax-m2.1; use for planning, architecture, strategy. Reasons by default — needs generous max_tokens."
         - model_name: coder-fast
           litellm_params:
             model: openai/gpt-oss-20b
@@ -454,7 +435,7 @@ spec:
             notes: "Alias for gemma-4-12b; 136 t/s, fast vision model"
         - model_name: overnight
           litellm_params:
-            model: openai/qwen3-235b-overnight
+            model: openai/minimax-m2.1
             api_base: http://10.10.10.218:8080/v1
             api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
             timeout: 1200
@@ -462,7 +443,7 @@ spec:
             supports_vision: false
             host: cerberus (Strix Halo, 128GB unified)
             role: "Overnight max-quality batch"
-            notes: "Alias for qwen3-235b-overnight; 17.5 t/s, 5/5 quality, runs alone (exclusive group)"
+            notes: "Alias for minimax-m2.1; 230B MoE, runs alone (exclusive group)"
       router_settings:
         num_retries: 2
         routing_strategy: simple-shuffle
