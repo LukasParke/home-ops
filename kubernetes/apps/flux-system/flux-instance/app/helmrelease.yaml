@@ -32,6 +32,35 @@ spec:
           app.kubernetes.io/name: flux
       kustomize:
         patches:
+          - # Keep controllers off one another when additional replicas are added.
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: all
+              spec:
+                template:
+                  spec:
+                    affinity:
+                      podAntiAffinity:
+                        preferredDuringSchedulingIgnoredDuringExecution:
+                          - weight: 100
+                            podAffinityTerm:
+                              labelSelector:
+                                matchExpressions:
+                                  - key: app.kubernetes.io/component
+                                    operator: In
+                                    values:
+                                      - source-controller
+                                      - kustomize-controller
+                                      - helm-controller
+                                      - notification-controller
+                                      - image-reflector-controller
+                                      - image-automation-controller
+                              topologyKey: kubernetes.io/hostname
+            target:
+              kind: Deployment
+              name: (source-controller|kustomize-controller|helm-controller|notification-controller|image-reflector-controller|image-automation-controller)
           - # Increase the number of workers
             patch: |
               - op: add

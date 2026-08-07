@@ -4,6 +4,9 @@ kind: Kustomization
 metadata:
   name: gatus
 spec:
+  dependsOn:
+    - name: csi-driver-nfs
+      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/default/gatus/app
   postBuild:

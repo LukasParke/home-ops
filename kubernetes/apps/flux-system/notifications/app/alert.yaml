@@ -1,0 +1,77 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: discord
+spec:
+  providerRef:
+    name: discord
+  eventMetadata:
+    cluster: kubernetes
+  eventSeverity: error
+  eventSources:
+    - kind: GitRepository
+      name: "*"
+    - kind: OCIRepository
+      name: "*"
+    - kind: ImageRepository
+      name: "*"
+    - kind: ImagePolicy
+      name: "*"
+    - kind: ImageUpdateAutomation
+      name: "*"
+    - kind: Kustomization
+      name: "*"
+    - kind: Kustomization
+      name: "*"
+      namespace: cert-manager
+    - kind: Kustomization
+      name: "*"
+      namespace: cnpg-system
+    - kind: Kustomization
+      name: "*"
+      namespace: default
+    - kind: Kustomization
+      name: "*"
+      namespace: forgejo
+    - kind: Kustomization
+      name: "*"
+      namespace: kube-system
+    - kind: Kustomization
+      name: "*"
+      namespace: network
+    - kind: Kustomization
+      name: "*"
+      namespace: observability
+    - kind: Kustomization
+      name: "*"
+      namespace: projects
+    - kind: Kustomization
+      name: "*"
+      namespace: system-upgrade
+    - kind: HelmRelease
+      name: "*"
+    - kind: HelmRelease
+      name: "*"
+      namespace: cert-manager
+    - kind: HelmRelease
+      name: "*"
+      namespace: cnpg-system
+    - kind: HelmRelease
+      name: "*"
+      namespace: default
+    - kind: HelmRelease
+      name: "*"
+      namespace: forgejo
+    - kind: HelmRelease
+      name: "*"
+      namespace: kube-system
+    - kind: HelmRelease
+      name: "*"
+      namespace: network
+    - kind: HelmRelease
+      name: "*"
+      namespace: observability
+    - kind: HelmRelease
+      name: "*"
+      namespace: system-upgrade

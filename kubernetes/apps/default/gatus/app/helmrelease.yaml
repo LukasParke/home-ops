@@ -34,7 +34,7 @@ spec:
                   - "[STATUS] == 200"
     controllers:
       gatus:
-        strategy: RollingUpdate
+        strategy: Recreate
         serviceAccount:
           name: gatus
         initContainers:
