@@ -19,6 +19,35 @@ spec:
         namespace: observability
   values:
     cleanPrometheusOperatorObjectNames: true
+    additionalPrometheusRulesMap:
+      home-ops:
+        groups:
+          - name: home-ops
+            rules:
+              - alert: ContainerRestartingFrequently
+                expr: increase(kube_pod_container_status_restarts_total[1h]) >= 2
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "{{ $labels.namespace }}/{{ $labels.pod }} is restarting frequently"
+                  description: "Container {{ $labels.container }} restarted {{ $value | humanize }} times in the last hour."
+              - alert: ProbeFailureRateHigh
+                expr: sum by (namespace, pod, probe_type) (rate(prober_probe_total{result="failed"}[15m])) > 0.01
+                for: 10m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "{{ $labels.namespace }}/{{ $labels.pod }} has failing {{ $labels.probe_type }} probes"
+                  description: "Probe failures exceed 0.01 per second for 10 minutes."
+              - alert: NFSClientRetransmissions
+                expr: sum by (instance) (rate(node_nfs_rpc_retransmissions_total[15m])) > 0
+                for: 10m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "NFS retransmissions detected on {{ $labels.instance }}"
+                  description: "The node has retried NFS RPC requests for at least 10 minutes."
     kubeProxy:
       enabled: false
     kubeControllerManager:
@@ -66,6 +95,17 @@ spec:
       prometheusSpec:
         retention: 15d
         replicas: 1
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: [prometheus]
+                  topologyKey: kubernetes.io/hostname
         resources:
           requests:
             cpu: 200m
@@ -82,20 +122,34 @@ spec:
         global:
           resolve_timeout: 5m
         route:
-          receiver: default
+          receiver: discord
           group_by: ["alertname", "job"]
           group_wait: 30s
           group_interval: 5m
           repeat_interval: 12h
           routes:
             - matchers:
-                - alertname="Watchdog"
+                - 'alertname="Watchdog"'
               receiver: "null"
         receivers:
-          - name: default
+          - name: discord
+            discord_configs:
+              - webhook_url: "${DISCORD_WEBHOOK_URL}"
+                send_resolved: true
           - name: "null"
       alertmanagerSpec:
         replicas: 1
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values: [alertmanager]
+                  topologyKey: kubernetes.io/hostname
         resources:
           requests:
             cpu: 25m
