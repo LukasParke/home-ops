@@ -95,17 +95,6 @@ spec:
       prometheusSpec:
         retention: 15d
         replicas: 1
-        affinity:
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchExpressions:
-                      - key: app.kubernetes.io/name
-                        operator: In
-                        values: [prometheus]
-                  topologyKey: kubernetes.io/hostname
         resources:
           requests:
             cpu: 200m
@@ -139,17 +128,6 @@ spec:
           - name: "null"
       alertmanagerSpec:
         replicas: 1
-        affinity:
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchExpressions:
-                      - key: app.kubernetes.io/name
-                        operator: In
-                        values: [alertmanager]
-                  topologyKey: kubernetes.io/hostname
         resources:
           requests:
             cpu: 25m
