@@ -141,11 +141,11 @@ spec:
             app:
               - path: /app/mcp/config/config.yaml
                 subPath: config.yaml
-      sitecustomize:
+      pth-patch:
         type: configMap
         name: graphiti-config
         advancedMounts:
           graphiti:
             app:
-              - path: /app/mcp/.venv/lib/python3.11/site-packages/sitecustomize.py
-                subPath: sitecustomize.py
+              - path: /app/mcp/.venv/lib/python3.11/site-packages/graphiti-no-host-check.pth
+                subPath: graphiti-no-host-check.pth
