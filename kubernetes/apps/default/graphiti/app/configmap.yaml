@@ -1,0 +1,75 @@
+---
+# Graphiti MCP server config, mounted at $CONFIG_PATH (/app/mcp/config/config.yaml).
+# Based on the upstream default (mcp_server/config/config.yaml) with:
+#   - llm + embedder pointed at the in-cluster Bifrost gateway via $${OPENAI_API_URL}
+#   - embedder dimensions driven by $${EMBEDDING_DIMENSIONS} (qwen3-embed = 1024;
+#     the upstream default hardcodes 1536 for text-embedding-3-small)
+# Supports $${VAR} / $${VAR:default} expansion at server startup.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graphiti-config
+data:
+  config.yaml: |
+    server:
+      transport: "http"
+      host: "0.0.0.0"
+      port: 8000
+
+    llm:
+      provider: "openai"  # OpenAI-compatible: Bifrost gateway → llama-swap hosts
+      model: $${MODEL_NAME:talos/qwen3.6-35b-a3b}
+      max_tokens: 4096
+      # llama.cpp enforces json_schema via GBNF grammars, so the default is
+      # safe. If extraction errors appear, set LLM_STRUCTURED_OUTPUT_MODE=json_object.
+      structured_output_mode: $${LLM_STRUCTURED_OUTPUT_MODE:json_schema}
+
+      providers:
+        openai:
+          api_key: $${OPENAI_API_KEY}
+          api_url: $${OPENAI_API_URL:https://api.openai.com/v1}
+
+    embedder:
+      provider: "openai"  # Bifrost → hephaestus/qwen3-embed
+      model: $${EMBEDDER_MODEL:hephaestus/qwen3-embed}
+      dimensions: $${EMBEDDING_DIMENSIONS:1024}
+
+      providers:
+        openai:
+          api_key: $${OPENAI_API_KEY}
+          api_url: $${OPENAI_API_URL:https://api.openai.com/v1}
+
+    database:
+      provider: "falkordb"
+
+      providers:
+        falkordb:
+          uri: $${FALKORDB_URI:redis://localhost:6379}
+          password: $${FALKORDB_PASSWORD:}
+          database: $${FALKORDB_DATABASE:default_db}
+
+    graphiti:
+      group_id: $${GRAPHITI_GROUP_ID:main}
+      episode_id_prefix: $${EPISODE_ID_PREFIX:}
+      user_id: $${USER_ID:mcp_user}
+      entity_types:
+        - name: "Preference"
+          description: "User preferences, choices, opinions, or selections (PRIORITIZE over most other types except User/Assistant)"
+        - name: "Requirement"
+          description: "Specific needs, features, or functionality that must be fulfilled"
+        - name: "Procedure"
+          description: "Standard operating procedures and sequential instructions"
+        - name: "Location"
+          description: "Physical or virtual places where activities occur"
+        - name: "Event"
+          description: "Time-bound activities, occurrences, or experiences"
+        - name: "Organization"
+          description: "Companies, institutions, groups, or formal entities"
+        - name: "Document"
+          description: "Information content in various forms (books, articles, reports, etc.)"
+        - name: "Topic"
+          description: "Subject of conversation, interest, or knowledge domain (use as last resort)"
+        - name: "Person"
+          description: "An individual human referenced in the content"
+        - name: "Object"
+          description: "Physical items, tools, devices, or possessions (use as last resort)"

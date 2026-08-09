@@ -1,0 +1,32 @@
+---
+# Public route for the Graphiti MCP endpoint, for agents off-LAN
+# (Pi / Claude Code on the laptop, other systems via the REST-shaped MCP
+# streamable-HTTP transport at /mcp/).
+#
+# Published on a DISTINCT hostname (memory.<domain>) rather than reusing
+# graphiti.<domain>: that name already resolves to the internal gateway, and
+# external-dns derives records from HTTPRoute hostnames, so dual-homing one
+# name across both gateways would produce conflicting targets. Internal callers
+# keep using graphiti.<domain> with no key.
+#
+# The Graphiti MCP server has NO built-in authentication, and it is a read/write
+# store over the shared memory graph — anonymous access would expose every
+# memory and allow graph poisoning. So this route is gated by the
+# SecurityPolicy in securitypolicy.yaml, which requires an API key at the
+# gateway before traffic reaches the pod. Same pattern as steel-api-external.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: graphiti-mcp-external
+  annotations:
+    gethomepage.dev/enabled: "false"
+spec:
+  hostnames: ["memory.${SECRET_DOMAIN}"]
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: graphiti
+          port: 8000

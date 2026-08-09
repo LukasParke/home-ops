@@ -1,0 +1,32 @@
+---
+# Gateway-level API key auth for the public Graphiti MCP route.
+#
+# Graphiti ships no authentication of its own, so without this the public route
+# would be an anonymous read/write window into the shared memory graph.
+#
+# Enforced by Envoy before the request reaches the pod. Accepts either
+#   x-api-key: <key>
+#   Authorization: Bearer <key>
+# (the Bearer form works because Envoy strips the scheme when extracting from
+# Authorization; MCP clients that only support bearer headers are fine).
+#
+# Targets ONLY the external HTTPRoute, so the internal route stays key-free for
+# on-network/VPN use.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: graphiti-mcp-external
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: graphiti-mcp-external
+  apiKeyAuth:
+    credentialRefs:
+      - group: ""
+        kind: Secret
+        name: graphiti-apikeys
+    extractFrom:
+      - headers:
+          - x-api-key
+          - authorization

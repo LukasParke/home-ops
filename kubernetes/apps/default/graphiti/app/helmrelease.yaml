@@ -1,0 +1,143 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+#
+# Graphiti MCP server (getzep/graphiti mcp_server) — the shared agentic memory
+# layer for Pi, Claude Code, Hermes, and other MCP clients.
+#
+# Image is Zep's combined "knowledge-graph-mcp" container: FalkorDB (graph
+# store, Redis protocol on :6379) + the MCP server (streamable HTTP on :8000,
+# endpoint /mcp/) under supervisord. This is the upstream-supported OSS path —
+# Zep Community Edition is deprecated (moved to getzep/zep legacy/).
+#
+# LLM/embedder go through the in-cluster Bifrost gateway (OpenAI-compatible):
+#   extraction:  talos/qwen3.6-35b-a3b (fast 35B MoE; cerberus also allowed on the VK)
+#   embeddings:  hephaestus/qwen3-embed (1024-dim)
+# Auth is a seeded Bifrost virtual key (see bifrost helmrelease governance
+# block), passed as the standard OpenAI Bearer token.
+#
+# Config is env-driven via the ConfigMap in configmap.yaml (env expansion at
+# startup). Graphiti depends on reliable structured JSON output for entity/edge
+# extraction — llama.cpp enforces json_schema via grammars; if extraction
+# errors appear, set LLM_STRUCTURED_OUTPUT_MODE=json_object.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: graphiti
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: graphiti
+  interval: 1h
+  values:
+    controllers:
+      graphiti:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/zepai/knowledge-graph-mcp
+              tag: 1.0.2
+            env:
+              CONFIG_PATH: /app/mcp/config/config.yaml
+              # FalkorDB runs in the same container (supervisord).
+              FALKORDB_URI: redis://localhost:6379
+              FALKORDB_DATABASE: default_db
+              # Disable the bundled FalkorDB browser UI (:3000) — no auth.
+              BROWSER: "0"
+              # Default graph partition; clients can pass their own group_id
+              # for shared vs per-agent scoping.
+              GRAPHITI_GROUP_ID: main
+              SEMAPHORE_LIMIT: "10"
+              # Bifrost gateway + seeded virtual key (env.GRAPHITI_BIFROST_VK).
+              OPENAI_API_URL: http://bifrost.default.svc.cluster.local:8080/v1
+              OPENAI_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: cluster-secrets
+                    key: GRAPHITI_BIFROST_VK
+              MODEL_NAME: talos/qwen3.6-35b-a3b
+              EMBEDDER_MODEL: hephaestus/qwen3-embed
+              EMBEDDING_DIMENSIONS: "1024"
+            probes:
+              # MCP endpoint is not plain-GET friendly (expects MCP protocol),
+              # so probe the TCP listener.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &port 8000
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 250m
+                memory: 768Mi
+              limits:
+                memory: 2Gi
+    # NOTE: the combined image runs supervisord as root to manage redis-server
+    # + uvicorn, so no restrictive pod/container securityContext here.
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    # Internal route: graphiti.<domain> on envoy-internal, key-free for
+    # on-network/VPN agents. The external route (memory.<domain>) lives in
+    # httproute.yaml and is gated by securitypolicy.yaml.
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "false"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      # FalkorDB RDB/AOF persistence.
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: nfs
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        globalMounts:
+          - path: /var/lib/falkordb/data
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /var/log/graphiti
+      config:
+        type: configMap
+        name: graphiti-config
+        advancedMounts:
+          graphiti:
+            app:
+              - path: /app/mcp/config/config.yaml
+                subPath: config.yaml
