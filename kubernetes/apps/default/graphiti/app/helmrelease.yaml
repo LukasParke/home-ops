@@ -161,5 +161,7 @@ spec:
         advancedMounts:
           graphiti:
             app:
-              - path: /app/mcp/.venv/lib/python3.11/site-packages/graphiti-no-host-check.pth
+              # Python version follows the upstream Dockerfile base — was
+              # 3.11 in 1.0.2, 3.13 in the main-branch build.
+              - path: /app/mcp/.venv/lib/python3.13/site-packages/graphiti-no-host-check.pth
                 subPath: graphiti-no-host-check.pth
