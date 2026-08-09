@@ -43,7 +43,14 @@ spec:
     image:
       # Always pin the tag - the chart will not start without it. Renovate
       # bumps this via the HelmRepository chart version and image tag.
-      tag: v1.5.12
+      # v1.6.9 (chart appVersion lags at 1.5.12): in <=1.5.12 the auth
+      # middleware rejected virtual-key-only inference requests (VK setter for
+      # IsAPIKeyAuthContextKey missing in OSS), forcing Basic admin auth +
+      # x-bf-vk together. In 1.6.x InferenceMiddleware delegates inference
+      # auth entirely to the governance plugin, so a plain
+      # `Authorization: Bearer sk-bf-...` virtual key works like a normal API
+      # key. Dashboard/API routes stay protected by admin auth.
+      tag: v1.6.9
 
     replicaCount: 1
 
