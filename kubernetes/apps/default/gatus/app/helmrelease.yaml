@@ -26,6 +26,14 @@ spec:
             ui:
               title: Status
               header: Gatus
+            alerting:
+              discord:
+                webhook-url: "${DISCORD_WEBHOOK_URL}"
+                default-alert:
+                  description: "site flapping"
+                  failure-threshold: 2
+                  success-threshold: 2
+                  send-on-resolved: true
             endpoints:
               - name: SailPoint Developer Docs
                 url: "https://developer.sailpoint.com"
@@ -34,9 +42,27 @@ spec:
                   - "[STATUS] == 200"
               - name: Bifrost
                 url: "https://bifrost.${SECRET_DOMAIN}/health"
-                interval: 5m
+                interval: 1m
+                alerts:
+                  - type: discord
                 conditions:
                   - "[STATUS] == 200"
+              - name: Parke.dev (apex)
+                url: "https://${SECRET_DOMAIN}"
+                interval: 1m
+                alerts:
+                  - type: discord
+                conditions:
+                  - "[STATUS] == 200"
+              # 401 is the HEALTHY response here: proves envoy-external +
+              # SecurityPolicy + graphiti service are all up.
+              - name: Graphiti MCP (external route)
+                url: "https://memory.${SECRET_DOMAIN}/mcp"
+                interval: 1m
+                alerts:
+                  - type: discord
+                conditions:
+                  - "[STATUS] == 401"
     controllers:
       gatus:
         strategy: Recreate
