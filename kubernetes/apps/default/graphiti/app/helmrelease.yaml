@@ -43,6 +43,8 @@ spec:
               # to a ghcr push (or the next upstream release) before relying on it.
               repository: ttl.sh/graphiti-mcp-c6691775-4c6
               tag: 24h
+              # Mutable test tag — must re-pull on restart.
+              pullPolicy: Always
             env:
               CONFIG_PATH: /app/mcp/config/config.yaml
               # FalkorDB runs in the same container (supervisord).
