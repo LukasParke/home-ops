@@ -66,7 +66,12 @@ spec:
               # bifrost→llama.cpp conversion; json_object makes Graphiti inject
               # the schema into the prompt instead (upstream-documented fix).
               LLM_STRUCTURED_OUTPUT_MODE: json_object
-              MODEL_NAME: talos/qwen3.6-35b-a3b
+              # gpt-oss-120b returns schema-conformant structured output
+              # through bifrost→llama.cpp (verified); qwen3.6-35b-a3b does
+              # not (returns prose/raw lists/wrong keys, failing Pydantic
+              # validation), so it can't be used for extraction despite being
+              # faster. It remains on the VK allowlist for non-extraction use.
+              MODEL_NAME: cerberus/gpt-oss-120b
               EMBEDDER_MODEL: hephaestus/qwen3-embed
               EMBEDDING_DIMENSIONS: "1024"
             probes:
