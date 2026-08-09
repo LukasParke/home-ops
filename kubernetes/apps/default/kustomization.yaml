@@ -23,6 +23,7 @@ resources:
   - ./termix-guacd/ks.yaml
   - ./termix/ks.yaml
   - ./firecrawl/ks.yaml
+  - ./firecrawl-mcp/ks.yaml
   - ./bifrost/ks.yaml
   - ./steel/ks.yaml
   - ./graphiti/ks.yaml
