@@ -25,6 +25,9 @@ spec:
             command: ["npx", "-y", "firecrawl-mcp@3.23.6"]
             env:
               HTTP_STREAMABLE_SERVER: "true"
+              # Bind all interfaces — default is localhost, which makes the
+              # pod unreachable (probes fail, CrashLoopBackOff).
+              HOST: 0.0.0.0
               # In-cluster self-hosted API; auth disabled there
               # (USE_DB_AUTHENTICATION=false), so no API key is needed.
               FIRECRAWL_API_URL: http://firecrawl-api.default.svc.cluster.local:3002
