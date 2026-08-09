@@ -50,6 +50,12 @@ spec:
               # for shared vs per-agent scoping.
               GRAPHITI_GROUP_ID: main
               SEMAPHORE_LIMIT: "10"
+              # The MCP SDK's DNS-rebinding protection rejects any Host that
+              # isn't localhost (421 Invalid Host header) — our gateway
+              # hostnames, the ClusterIP service name, and pod IPs all vary,
+              # and the gateway (envoy + SecurityPolicy on the external route)
+              # is the real security boundary.
+              FASTMCP_TRANSPORT_SECURITY__ENABLE_DNS_REBINDING_PROTECTION: "false"
               # Bifrost gateway + seeded virtual key (env.GRAPHITI_BIFROST_VK).
               OPENAI_API_URL: http://bifrost.default.svc.cluster.local:8080/v1
               OPENAI_API_KEY:
