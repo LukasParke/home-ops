@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+#
+# MCP adapter for the self-hosted Firecrawl API. The API itself is REST-only;
+# the official firecrawl-mcp package fronts it with a streamable-HTTP MCP
+# endpoint at :3000/mcp that the Bifrost MCP gateway connects to.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: firecrawl-mcp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: firecrawl-mcp
+  interval: 1h
+  values:
+    controllers:
+      firecrawl-mcp:
+        containers:
+          app:
+            image:
+              repository: docker.io/node
+              tag: 24-alpine
+            # npx fetches the pinned package at startup (image stays stock).
+            command: ["npx", "-y", "firecrawl-mcp@3.23.6"]
+            env:
+              HTTP_STREAMABLE_SERVER: "true"
+              # In-cluster self-hosted API; auth disabled there
+              # (USE_DB_AUTHENTICATION=false), so no API key is needed.
+              FIRECRAWL_API_URL: http://firecrawl-api.default.svc.cluster.local:3002
+            probes:
+              liveness:
+                enabled: true
+                type: TCP
+              readiness:
+                enabled: true
+                type: TCP
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    service:
+      app:
+        ports:
+          http:
+            port: 3000
