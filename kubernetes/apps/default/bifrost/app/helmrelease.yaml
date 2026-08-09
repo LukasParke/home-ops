@@ -15,6 +15,31 @@ spec:
       version: "2.1.x"
   interval: 1h
   values:
+    # Inject the llama-swap host keys as env vars so the providers' env.*
+    # references resolve. Without these, every key has an empty value and all
+    # routing fails with "no keys found for provider".
+    env:
+      - name: CERBERUS_LLAMASWAP_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cluster-secrets
+            key: CERBERUS_LLAMASWAP_API_KEY
+      - name: TALOS_LLAMASWAP_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cluster-secrets
+            key: TALOS_LLAMASWAP_API_KEY
+      - name: HEPHAESTUS_LLAMASWAP_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cluster-secrets
+            key: HEPHAESTUS_LLAMASWAP_API_KEY
+      - name: DELPHI_LLAMASWAP_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cluster-secrets
+            key: DELPHI_LLAMASWAP_API_KEY
+
     image:
       # Always pin the tag - the chart will not start without it. Renovate
       # bumps this via the HelmRepository chart version and image tag.
