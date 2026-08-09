@@ -158,6 +158,44 @@ spec:
 
       client:
         disableDbPingsInHealth: true
+        # Public base URL used as OAuth redirect_uri when Bifrost acts as an
+        # OAuth client to upstream MCP servers (Notion/Linear/Slack).
+        mcpExternalClientUrl: https://bifrost.${SECRET_DOMAIN}
+
+      # MCP gateway: upstream MCP servers whose tools become available to
+      # agents through Bifrost. In-cluster servers connect directly; the SaaS
+      # servers use OAuth (one-time consent via the dashboard after deploy).
+      mcp:
+        enabled: true
+        clientConfigs:
+          # Graphiti shared agent memory (streamable HTTP, in-cluster).
+          - name: graphiti
+            connectionType: http
+            httpConfig:
+              url: http://graphiti.default.svc.cluster.local:8000/mcp/
+            authType: none
+            allowOnAllVirtualKeys: true
+          # SaaS hosted MCP servers — OAuth flow completed once via the
+          # Bifrost dashboard after deploy (redirect_uri =
+          # mcpExternalClientUrl above).
+          - name: notion
+            connectionType: http
+            httpConfig:
+              url: https://mcp.notion.com/mcp
+            authType: oauth
+            allowOnAllVirtualKeys: true
+          - name: linear
+            connectionType: http
+            httpConfig:
+              url: https://mcp.linear.app/mcp
+            authType: oauth
+            allowOnAllVirtualKeys: true
+          - name: slack
+            connectionType: http
+            httpConfig:
+              url: https://mcp.slack.com/mcp
+            authType: oauth
+            allowOnAllVirtualKeys: true
 
       # Protect the Bifrost admin dashboard/API with creds from cluster-secrets
       # (SOPS). Inference requests use virtual API keys; see docs. On >=1.6.x a
