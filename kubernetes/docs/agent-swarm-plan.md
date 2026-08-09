@@ -1,11 +1,11 @@
 # Multi-Host Agent Swarm — Fleet Architecture Plan
 
-## The Fleet (15 models, 4 hosts, 1 LiteLLM proxy)
+## The Fleet (15 models, 4 hosts, 1 Bifrost proxy)
 
 ```
                          ┌─────────────────────────────────┐
-                         │     LiteLLM Proxy (k8s)         │
-                         │  litellm.${SECRET_DOMAIN}       │
+                         │     Bifrost Proxy (k8s)         │
+                         │  bifrost.${SECRET_DOMAIN}        │
                          │  OpenAI-compatible API          │
                          │  15 models, unified routing     │
                          └───────────┬─────────────────────┘
@@ -53,12 +53,12 @@ Each model has a "best role" based on its speed, intelligence, and capabilities:
 
 ---
 
-## 2. LiteLLM Model Aliases (Virtual Routing)
+## 2. Bifrost Model Aliases (Virtual Routing)
 
-Create **virtual model names** in LiteLLM so agents reference roles, not specific models. This lets you hot-swap models without changing agent code:
+Create **virtual model names** in Bifrost so agents reference roles, not specific models. This lets you hot-swap models without changing agent code:
 
 ```yaml
-# Add to LiteLLM helmrelease model_list:
+# Add to Bifrost helmrelease providers.openai.keys (per-host key blocks):
 
 # ── Virtual aliases (role-based routing) ──
 - model_name: planner          # CEO/strategist
@@ -125,7 +125,7 @@ Create **virtual model names** in LiteLLM so agents reference roles, not specifi
     timeout: 1200
 ```
 
-Agents now reference `model: planner`, `model: coder-fast`, etc. — LiteLLM routes to the right host.
+Agents now reference `model: planner`, `model: coder-fast`, etc. — Bifrost routes to the right host.
 
 ---
 
@@ -167,24 +167,24 @@ const swarm = new Swarm({
   orchestratorModel: {
     provider: "openai",
     model: "planner",
-    apiBase: "https://litellm.${SECRET_DOMAIN}/v1",
-    apiKey: process.env.LITELLM_MASTER_KEY,
+    apiBase: "https://bifrost.${SECRET_DOMAIN}/v1",
+    apiKey: process.env.BIFROST_API_KEY,
   },
 
   // Team leads: quality coding (cerberus coder, HIP backend)
   teamLeadModel: {
     provider: "openai",
     model: "coder-quality",
-    apiBase: "https://litellm.${SECRET_DOMAIN}/v1",
-    apiKey: process.env.LITELLM_MASTER_KEY,
+    apiBase: "https://bifrost.${SECRET_DOMAIN}/v1",
+    apiKey: process.env.BIFROST_API_KEY,
   },
 
   // Workers: fast execution (talos gpt-oss-20b / hephaestus ornith-9b)
   workerModel: {
     provider: "openai",
     model: "coder-fast",
-    apiBase: "https://litellm.${SECRET_DOMAIN}/v1",
-    apiKey: process.env.LITELLM_MASTER_KEY,
+    apiBase: "https://bifrost.${SECRET_DOMAIN}/v1",
+    apiKey: process.env.BIFROST_API_KEY,
   },
 
   costBudget: 0,        // local models = free
@@ -239,9 +239,9 @@ GOOSE_MODEL: coder-quality         # default execution model
 GOOSE_PLANNER_MODEL: planner       # strategic planning
 GOOSE_PLANNER_PROVIDER: openai
 
-# Set base URL to LiteLLM
-OPENAI_BASE_URL: https://litellm.${SECRET_DOMAIN}/v1
-OPENAI_API_KEY: ${LITELLM_MASTER_KEY}
+# Set base URL to Bifrost
+OPENAI_BASE_URL: https://bifrost.${SECRET_DOMAIN}/v1
+OPENAI_API_KEY: ${BIFROST_API_KEY}
 ```
 
 Then in a Goose session:
@@ -283,9 +283,9 @@ User Query
 └─────────────────┘     └──────────────────┘     └─────────────────┘
 ```
 
-### Implementation (LiteLLM as unified RAG endpoint)
+### Implementation (Bifrost as unified RAG endpoint)
 
-All endpoints are already in LiteLLM:
+All endpoints are already in Bifrost:
 - `POST /v1/embeddings` with `model: qwen3-embed` → hephaestus
 - `POST /rerank` with `model: bge-reranker-v2-m3` → delphi
 - `POST /v1/chat/completions` with any model → routed to best host
@@ -295,8 +295,8 @@ All endpoints are already in LiteLLM:
 import openai
 
 client = openai.OpenAI(
-    base_url="https://litellm.${SECRET_DOMAIN}/v1",
-    api_key=os.environ["LITELLM_MASTER_KEY"]
+    base_url="https://bifrost.${SECRET_DOMAIN}/v1",
+    api_key=os.environ["BIFROST_API_KEY"]
 )
 
 # 1. Embed the query
@@ -311,7 +311,7 @@ candidates = vector_db.search(query_embedding, top_k=50)
 
 # 3. Rerank (delphi bge-reranker)
 rerank_response = httpx.post(
-    f"{LITELLM_BASE}/rerank",
+    f"{BIFROST_BASE}/rerank",
     json={"model": "bge-reranker-v2-m3", "query": user_query, "documents": candidates}
 )
 ranked = sorted(rerank_response.json()["results"], key=lambda x: x["relevance_score"], reverse=True)
@@ -456,20 +456,20 @@ Use Goose's orchestration or pi-swarm's `maxConcurrentAgents: 3` to respect this
 
 ## 8. Implementation Roadmap
 
-### Phase 1: LiteLLM aliases (1 hour)
+### Phase 1: Bifrost aliases (1 hour)
 - Add the 9 virtual model aliases (planner, coder-fast, coder-quality, etc.) to the helmrelease
 - Commit, push, Flux reconciles
-- Test: `curl https://litellm.${SECRET_DOMAIN}/v1/chat/completions -d '{"model":"planner",...}'`
+- Test: `curl https://bifrost.${SECRET_DOMAIN}/v1/chat/completions -d '{"model":"planner",...}'`
 
 ### Phase 2: Goose setup (30 min)
 - Install Goose on your workstation
-- Configure `~/.config/goose/config.yaml` with LiteLLM base URL
+- Configure `~/.config/goose/config.yaml` with Bifrost base URL
 - Set planner model = planner, default = coder-quality
 - Test: `goose session` → ask it to plan + implement a feature
 
 ### Phase 3: pi-swarm setup (1 hour)
 - Clone pi-swarm, npm install, build
-- Configure `.env` with `OPENAI_API_KEY` = LiteLLM master key, `OPENAI_BASE_URL` = LiteLLM URL
+- Configure `.env` with `OPENAI_API_KEY` = Bifrost API key, `OPENAI_BASE_URL` = Bifrost URL
 - Create custom teams (dev team + planning team) as shown above
 - Test: `npx tsx examples/custom-team.ts "Build a REST API"`
 
@@ -480,7 +480,7 @@ Use Goose's orchestration or pi-swarm's `maxConcurrentAgents: 3` to respect this
 - Connect to Goose/pi-swarm as a tool (retrieval before generation)
 
 ### Phase 5: Hermes integration (2 hours)
-- Add a Hermes hook that routes Discord messages to the right model via LiteLLM
+- Add a Hermes hook that routes Discord messages to the right model via Bifrost
 - Set up cron jobs for overnight 235B tasks
 - Use the Kanban board to track multi-step agent tasks
 - Test: `@hermes plan: review our k8s manifests for security issues` → routes to planner
@@ -497,7 +497,7 @@ Use Goose's orchestration or pi-swarm's `maxConcurrentAgents: 3` to respect this
 
 | Layer | Tool | Why |
 |---|---|---|
-| **API gateway** | LiteLLM (already deployed) | Unified OpenAI-compatible API, 15 models |
+| **API gateway** | Bifrost (already deployed) | Unified OpenAI-compatible API, 15 models |
 | **Interactive coding** | Goose (Block/AAIF) | Desktop CLI, file editing, multi-model switching, orchestration |
 | **Batch orchestration** | pi-swarm | Hierarchical CEO→Lead→Worker, per-tier models, custom teams |
 | **Agent toolkit** | Pi.dev (already using!) | Unified LLM API, CLI, TUI, skills, extensions |

@@ -23,5 +23,5 @@ resources:
   - ./termix-guacd/ks.yaml
   - ./termix/ks.yaml
   - ./firecrawl/ks.yaml
-  - ./litellm/ks.yaml
+  - ./bifrost/ks.yaml
   - ./steel/ks.yaml
