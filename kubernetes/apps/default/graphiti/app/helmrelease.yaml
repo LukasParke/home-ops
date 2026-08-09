@@ -50,12 +50,6 @@ spec:
               # for shared vs per-agent scoping.
               GRAPHITI_GROUP_ID: main
               SEMAPHORE_LIMIT: "10"
-              # The MCP SDK's DNS-rebinding protection rejects any Host that
-              # isn't localhost (421 Invalid Host header) — our gateway
-              # hostnames, the ClusterIP service name, and pod IPs all vary,
-              # and the gateway (envoy + SecurityPolicy on the external route)
-              # is the real security boundary.
-              FASTMCP_TRANSPORT_SECURITY__ENABLE_DNS_REBINDING_PROTECTION: "false"
               # Bifrost gateway + seeded virtual key (env.GRAPHITI_BIFROST_VK).
               OPENAI_API_URL: http://bifrost.default.svc.cluster.local:8080/v1
               OPENAI_API_KEY:
@@ -122,7 +116,17 @@ spec:
             namespace: network
             sectionName: https
         rules:
-          - backendRefs:
+          # The MCP SDK auto-enables DNS-rebinding protection with a
+          # localhost-only allowlist (FastMCP ctor default), and Graphiti sets
+          # host after construction, so it can't be configured off. Rewrite
+          # the authority to localhost at the gateway, like steel's CDP route.
+          # NOTE: clients must use /mcp (no trailing slash) — POST /mcp/ gets
+          # a 307 whose Location inherits this rewritten (unresolvable) Host.
+          - filters:
+              - type: URLRewrite
+                urlRewrite:
+                  hostname: localhost
+            backendRefs:
               - identifier: app
                 port: *port
     persistence:
