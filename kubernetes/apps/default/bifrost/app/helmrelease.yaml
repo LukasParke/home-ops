@@ -46,56 +46,70 @@ spec:
         key: BIFROST_ENCRYPTION_KEY
 
       # Single replica for homelab; cluster mode (gossip/grpc) only if HA is
-      # ever needed. Each provider key maps to one llama-swap host (all
-      # OpenAI-compatible /v1). Keys live in cluster-secrets.sops.yaml and are
-      # referenced as env.<KEY>.
+      # ever needed.
+      #
+      # One custom provider per llama-swap host. base_url is provider-level in
+      # Bifrost (keys have no URL field), so the previous single-`openai`
+      # provider with four keys could not route to four different hosts — it
+      # defaulted to api.openai.com. Each provider wraps the built-in OpenAI
+      # provider (llama-swap is OpenAI-compatible) with its own base_url.
+      #
+      # models: ["*"] per key: llama-swap's own config is the source of truth
+      # for which models a host serves (GET /v1/models), so adding a model to
+      # a host needs no Bifrost change. Clients must address models as
+      # `<host>/<model>` (e.g. `talos/ornith-35b`) — with four providers a
+      # bare model name cannot be mapped to a host. Keys live in
+      # cluster-secrets.sops.yaml and are referenced as env.<KEY>.
       providers:
-        openai:
-          keys:
-            - name: cerberus
-              value: env.CERBERUS_LLAMASWAP_API_KEY
-              models:
-                - minimax-m2.1
-                - mistral-small-4
-                - gpt-oss-120b
-                - gemma-4-26b-a4b
-                - qwen3-coder-next-80b
-                - glm-4.7-flash
-              weight: 1
-            - name: talos
-              value: env.TALOS_LLAMASWAP_API_KEY
-              models:
-                - qwen3.6-35b-a3b
-                - devstral-24b
-                - ornith-35b
-                - qwen3.6-27b-dense
-                - qwen3.6-27b-nvfp4
-                - qwen3.6-35b-a3b-nvfp4
-              weight: 1
-            - name: hephaestus
-              value: env.HEPHAESTUS_LLAMASWAP_API_KEY
-              models:
-                - ornith-9b
-                - gemma-4-12b
-                - qwen3-embed
-              weight: 1
-            - name: delphi
-              value: env.DELPHI_LLAMASWAP_API_KEY
-              models:
-                - phi-4
-                - gpt-oss-20b
-                - mistral-small-3.2-24b
-                - mistral-small-3.2-24b-vision
-                - deepseek-r1-14b
-                - bge-reranker-v2-m3
-              weight: 1
-          network_config:
+        cerberus:
+          custom_provider_config:
+            base_provider_type: openai
+          network_config: &hostNetwork
+            base_url: http://10.10.10.218:8080/v1
             # Cold model swaps on llama-swap take 30-90s (235B: minutes).
             default_request_timeout_in_seconds: 600
             max_retries: 3
             # NOTE: key names are retry_backoff_*_ms per the chart schema.
             retry_backoff_initial_ms: 500
             retry_backoff_max_ms: 5000
+          keys:
+            - name: cerberus
+              value: env.CERBERUS_LLAMASWAP_API_KEY
+              models: ["*"]
+              weight: 1
+        talos:
+          custom_provider_config:
+            base_provider_type: openai
+          network_config:
+            <<: *hostNetwork
+            base_url: http://10.10.10.81:8080/v1
+          keys:
+            - name: talos
+              value: env.TALOS_LLAMASWAP_API_KEY
+              models: ["*"]
+              weight: 1
+        hephaestus:
+          custom_provider_config:
+            base_provider_type: openai
+          network_config:
+            <<: *hostNetwork
+            base_url: http://10.10.10.65:8080/v1
+          keys:
+            - name: hephaestus
+              value: env.HEPHAESTUS_LLAMASWAP_API_KEY
+              models: ["*"]
+              weight: 1
+        delphi:
+          custom_provider_config:
+            base_provider_type: openai
+          network_config:
+            <<: *hostNetwork
+            base_url: http://10.10.10.18:8080/v1
+          keys:
+            - name: delphi
+              value: env.DELPHI_LLAMASWAP_API_KEY
+              models: ["*"]
+              weight: 1
 
       client:
         disableDbPingsInHealth: true
