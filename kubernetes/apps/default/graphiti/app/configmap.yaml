@@ -19,20 +19,10 @@ data:
   # (A sitecustomize.py doesn't work: Debian ships one in /usr/lib that
   # shadows venv site-packages.)
   # The envoy gateways (plus SecurityPolicy on the external route) are the
-  # real security boundary.
-  #
-  # Line 2 swaps the MCP server's LLM client for graphiti-core's
-  # OpenAIGenericClient: OpenAIClient only does structured output via the
-  # Responses API (responses.parse), and bifrost's responses→chat conversion
-  # drops text_format, so the model free-generates and fails Pydantic
-  # validation. OpenAIGenericClient uses chat.completions with response_format
-  # json_schema, which bifrost passes through to llama.cpp's grammar
-  # enforcement (verified conformant). The __init__ shim swallows the
-  # reasoning/verbosity kwargs the MCP factory passes. structured_output_mode
-  # is documented upstream but not implemented in mcp_server 1.0.2.
+  # real security boundary. Still needed on mcp_server@main — upstream has no
+  # config for it (getzep/graphiti#1745).
   graphiti-no-host-check.pth: |
     import mcp.server.transport_security as _ts; _ts.TransportSecurityMiddleware._validate_host = lambda self, host: True
-    import graphiti_core.llm_client as _lc, graphiti_core.llm_client.openai_generic_client as _g; _g.OpenAIGenericClient.__init__=(lambda _o: lambda self,config=None,cache=False,client=None,max_tokens=16384,**kw: _o(self,config,cache,client,max_tokens))(_g.OpenAIGenericClient.__init__); _lc.OpenAIClient=_g.OpenAIGenericClient
   config.yaml: |
     server:
       transport: "http"

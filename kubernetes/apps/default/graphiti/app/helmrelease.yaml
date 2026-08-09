@@ -37,8 +37,12 @@ spec:
         containers:
           app:
             image:
-              repository: docker.io/zepai/knowledge-graph-mcp
-              tag: 1.0.2
+              # TEST BUILD of mcp_server@main (graphiti-core 0.29.3): fixes
+              # api_url threading (getzep/graphiti#1744) and structured output
+              # via OpenAIGenericClient (#1746). ttl.sh expires in 24h — move
+              # to a ghcr push (or the next upstream release) before relying on it.
+              repository: ttl.sh/graphiti-mcp-c6691775-4c6
+              tag: 24h
             env:
               CONFIG_PATH: /app/mcp/config/config.yaml
               # FalkorDB runs in the same container (supervisord).
@@ -52,10 +56,7 @@ spec:
               SEMAPHORE_LIMIT: "10"
               # Bifrost gateway + seeded virtual key (env.GRAPHITI_BIFROST_VK).
               OPENAI_API_URL: http://bifrost.default.svc.cluster.local:8080/v1
-              # The MCP server's LLM factory ignores providers.openai.api_url
-              # (upstream bug — only the embedder honors it), so the LLM client
-              # falls back to the SDK's OPENAI_BASE_URL env var.
-              OPENAI_BASE_URL: http://bifrost.default.svc.cluster.local:8080/v1
+
               OPENAI_API_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -66,9 +67,11 @@ spec:
               # not (returns prose/raw lists/wrong keys, failing Pydantic
               # validation), so it can't be used for extraction despite being
               # faster. It remains on the VK allowlist for non-extraction use.
-              # NOTE: chat.completions + response_format json_schema comes via
-              # the OpenAIGenericClient swap in configmap.yaml (.pth patch).
               MODEL_NAME: cerberus/gpt-oss-120b
+              # main auto-selects OpenAIGenericClient for non-OpenAI api_url
+              # and implements structured_output_mode; json_schema rides
+              # llama.cpp's grammar enforcement (verified conformant).
+              LLM_STRUCTURED_OUTPUT_MODE: json_schema
               EMBEDDER_MODEL: hephaestus/qwen3-embed
               EMBEDDING_DIMENSIONS: "1024"
             probes:
