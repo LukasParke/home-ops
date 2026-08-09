@@ -52,6 +52,10 @@ spec:
               SEMAPHORE_LIMIT: "10"
               # Bifrost gateway + seeded virtual key (env.GRAPHITI_BIFROST_VK).
               OPENAI_API_URL: http://bifrost.default.svc.cluster.local:8080/v1
+              # The MCP server's LLM factory ignores providers.openai.api_url
+              # (upstream bug — only the embedder honors it), so the LLM client
+              # falls back to the SDK's OPENAI_BASE_URL env var.
+              OPENAI_BASE_URL: http://bifrost.default.svc.cluster.local:8080/v1
               OPENAI_API_KEY:
                 valueFrom:
                   secretKeyRef:
