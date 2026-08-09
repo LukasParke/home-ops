@@ -97,7 +97,9 @@ spec:
           custom_provider_config:
             base_provider_type: openai
           network_config: &hostNetwork
-            base_url: http://10.10.10.218:8080/v1
+            # NOTE: no /v1 suffix - Bifrost's openai provider family appends
+            # /v1/<endpoint> itself (a /v1 here yields /v1/v1/... -> 404).
+            base_url: http://10.10.10.218:8080
             # v1.5.9+ blocks RFC-1918 upstreams by default (SSRF guard). All
             # llama-swap hosts are on 10.10.10.0/24, so opt in explicitly —
             # without this, list-models fan-out fails and governance blocks
@@ -119,7 +121,7 @@ spec:
             base_provider_type: openai
           network_config:
             <<: *hostNetwork
-            base_url: http://10.10.10.81:8080/v1
+            base_url: http://10.10.10.81:8080
           keys:
             - name: talos
               value: env.TALOS_LLAMASWAP_API_KEY
@@ -130,7 +132,7 @@ spec:
             base_provider_type: openai
           network_config:
             <<: *hostNetwork
-            base_url: http://10.10.10.65:8080/v1
+            base_url: http://10.10.10.65:8080
           keys:
             - name: hephaestus
               value: env.HEPHAESTUS_LLAMASWAP_API_KEY
@@ -141,7 +143,7 @@ spec:
             base_provider_type: openai
           network_config:
             <<: *hostNetwork
-            base_url: http://10.10.10.18:8080/v1
+            base_url: http://10.10.10.18:8080
           keys:
             - name: delphi
               value: env.DELPHI_LLAMASWAP_API_KEY
