@@ -42,9 +42,10 @@ spec:
               # via OpenAIGenericClient (#1746). ttl.sh expires in 24h — move
               # to a ghcr push (or the next upstream release) before relying on it.
               repository: ttl.sh/graphiti-mcp-c6691775-4c6
-              tag: 24h
-              # Mutable test tag — must re-pull on restart.
-              pullPolicy: Always
+              # Immutable-ish tag per build — spegel's P2P mirror serves
+              # stale digests for re-pushed mutable tags even with
+              # pullPolicy: Always. Bump the tag on each test build.
+              tag: v2
             env:
               CONFIG_PATH: /app/mcp/config/config.yaml
               # FalkorDB runs in the same container (supervisord).
