@@ -123,9 +123,13 @@ spec:
           # NOTE: clients must use /mcp (no trailing slash) — POST /mcp/ gets
           # a 307 whose Location inherits this rewritten (unresolvable) Host.
           - filters:
-              - type: URLRewrite
-                urlRewrite:
-                  hostname: localhost
+              # urlRewrite.hostname rejects ports, and the MCP SDK's
+              # localhost:* allowlist requires one — so set Host explicitly.
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  set:
+                    - name: Host
+                      value: localhost:8000
             backendRefs:
               - identifier: app
                 port: *port

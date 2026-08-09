@@ -32,9 +32,13 @@ spec:
     # the internal route and steel's CDP route). Clients must use /mcp (no
     # trailing slash) — POST /mcp/ gets a 307 to an unresolvable Host.
     - filters:
-        - type: URLRewrite
-          urlRewrite:
-            hostname: localhost
+        # urlRewrite.hostname rejects ports, and the MCP SDK's localhost:*
+        # allowlist requires one — so set the Host header explicitly.
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: Host
+                value: localhost:8000
       backendRefs:
         - name: graphiti
           port: 8000
