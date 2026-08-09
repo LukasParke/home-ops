@@ -98,6 +98,11 @@ spec:
             base_provider_type: openai
           network_config: &hostNetwork
             base_url: http://10.10.10.218:8080/v1
+            # v1.5.9+ blocks RFC-1918 upstreams by default (SSRF guard). All
+            # llama-swap hosts are on 10.10.10.0/24, so opt in explicitly —
+            # without this, list-models fan-out fails and governance blocks
+            # every chat request with model_blocked (empty model catalog).
+            allow_private_network: true
             # Cold model swaps on llama-swap take 30-90s (235B: minutes).
             default_request_timeout_in_seconds: 600
             max_retries: 3
