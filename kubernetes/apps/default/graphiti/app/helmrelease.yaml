@@ -116,21 +116,7 @@ spec:
             namespace: network
             sectionName: https
         rules:
-          # The MCP SDK auto-enables DNS-rebinding protection with a
-          # localhost-only allowlist (FastMCP ctor default), and Graphiti sets
-          # host after construction, so it can't be configured off. Rewrite
-          # the authority to localhost at the gateway, like steel's CDP route.
-          # NOTE: clients must use /mcp (no trailing slash) — POST /mcp/ gets
-          # a 307 whose Location inherits this rewritten (unresolvable) Host.
-          - filters:
-              # urlRewrite.hostname rejects ports, and the MCP SDK's
-              # localhost:* allowlist requires one — so set Host explicitly.
-              - type: RequestHeaderModifier
-                requestHeaderModifier:
-                  set:
-                    - name: Host
-                      value: localhost:8000
-            backendRefs:
+          - backendRefs:
               - identifier: app
                 port: *port
     persistence:
@@ -155,3 +141,11 @@ spec:
             app:
               - path: /app/mcp/config/config.yaml
                 subPath: config.yaml
+      sitecustomize:
+        type: configMap
+        name: graphiti-config
+        advancedMounts:
+          graphiti:
+            app:
+              - path: /app/mcp/.venv/lib/python3.11/site-packages/sitecustomize.py
+                subPath: sitecustomize.py

@@ -27,18 +27,6 @@ spec:
       namespace: network
       sectionName: https
   rules:
-    # The MCP SDK auto-enables DNS-rebinding protection with a localhost-only
-    # allowlist, so rewrite the authority to localhost at the gateway (same as
-    # the internal route and steel's CDP route). Clients must use /mcp (no
-    # trailing slash) — POST /mcp/ gets a 307 to an unresolvable Host.
-    - filters:
-        # urlRewrite.hostname rejects ports, and the MCP SDK's localhost:*
-        # allowlist requires one — so set the Host header explicitly.
-        - type: RequestHeaderModifier
-          requestHeaderModifier:
-            set:
-              - name: Host
-                value: localhost:8000
-      backendRefs:
+    - backendRefs:
         - name: graphiti
           port: 8000

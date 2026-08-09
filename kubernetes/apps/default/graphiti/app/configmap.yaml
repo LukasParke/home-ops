@@ -10,6 +10,21 @@ kind: ConfigMap
 metadata:
   name: graphiti-config
 data:
+  # Auto-imported by the venv Python at startup (site module). Disables the
+  # MCP SDK's DNS-rebinding host validation: FastMCP's constructor
+  # auto-enables it with a localhost-only allowlist (host defaults to
+  # 127.0.0.1), and Graphiti sets host post-construction so it can't be
+  # configured off — every gateway request was rejected with 421, and the
+  # allowlist patterns require a port, which Gateway API host rewrites can't
+  # supply. The envoy gateways (plus SecurityPolicy on the external route)
+  # are the real security boundary.
+  sitecustomize.py: |
+    try:
+        from mcp.server.transport_security import TransportSecurityMiddleware
+
+        TransportSecurityMiddleware._validate_host = lambda self, host: True
+    except Exception:
+        pass
   config.yaml: |
     server:
       transport: "http"
