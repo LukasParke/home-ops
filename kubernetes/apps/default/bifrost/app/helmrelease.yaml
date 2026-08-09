@@ -1,0 +1,136 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bifrost
+spec:
+  chart:
+    spec:
+      chart: bifrost
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: bifrost
+      version: "2.1.x"
+  interval: 1h
+  values:
+    image:
+      # Always pin the tag - the chart will not start without it. Renovate
+      # bumps this via the HelmRepository chart version and image tag.
+      tag: v1.5.12
+
+    replicaCount: 1
+
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+
+    # Backing store for governance/usage metadata (cloudnative-pg).
+    storage:
+      mode: postgres
+
+    postgresql:
+      external:
+        enabled: true
+        host: bifrost-database-rw.default.svc.cluster.local
+        port: 5432
+        user: bifrost
+        database: bifrost
+        sslMode: disable
+        existingSecret: bifrost-database-app
+        passwordKey: password
+
+    bifrost:
+      encryptionKeySecret:
+        name: cluster-secrets
+        key: BIFROST_ENCRYPTION_KEY
+
+      # Single replica for homelab; cluster mode (gossip/grpc) only if HA is
+      # ever needed. Each provider key maps to one llama-swap host (all
+      # OpenAI-compatible /v1). Keys live in cluster-secrets.sops.yaml and are
+      # referenced as env.<KEY>.
+      providers:
+        openai:
+          keys:
+            - name: cerberus
+              value: env.CERBERUS_LLAMASWAP_API_KEY
+              models:
+                - minimax-m2.1
+                - mistral-small-4
+                - gpt-oss-120b
+                - gemma-4-26b-a4b
+                - qwen3-coder-next-80b
+                - glm-4.7-flash
+              weight: 1
+            - name: talos
+              value: env.TALOS_LLAMASWAP_API_KEY
+              models:
+                - qwen3.6-35b-a3b
+                - devstral-24b
+                - ornith-35b
+                - qwen3.6-27b-dense
+                - qwen3.6-27b-nvfp4
+                - qwen3.6-35b-a3b-nvfp4
+              weight: 1
+            - name: hephaestus
+              value: env.HEPHAESTUS_LLAMASWAP_API_KEY
+              models:
+                - ornith-9b
+                - gemma-4-12b
+                - qwen3-embed
+              weight: 1
+            - name: delphi
+              value: env.DELPHI_LLAMASWAP_API_KEY
+              models:
+                - phi-4
+                - gpt-oss-20b
+                - mistral-small-3.2-24b
+                - mistral-small-3.2-24b-vision
+                - deepseek-r1-14b
+                - bge-reranker-v2-m3
+              weight: 1
+          network_config:
+            # Cold model swaps on llama-swap take 30-90s (235B: minutes).
+            default_request_timeout_in_seconds: 600
+            max_retries: 3
+            # NOTE: key names are retry_backoff_*_ms per the chart schema.
+            retry_backoff_initial_ms: 500
+            retry_backoff_max_ms: 5000
+
+      client:
+        disableDbPingsInHealth: true
+
+      # Protect the Bifrost admin dashboard/API with creds from cluster-secrets
+      # (SOPS). Inference requests use virtual API keys; see docs.
+      authConfig:
+        isEnabled: true
+        existingSecret: cluster-secrets
+        usernameKey: BIFROST_ADMIN_USERNAME
+        passwordKey: BIFROST_ADMIN_PASSWORD
+
+    # Bifrost serves /health (liveness/readiness). disableDbPingsInHealth
+    # means /health returns without pinging the DB.
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        memory: 2Gi

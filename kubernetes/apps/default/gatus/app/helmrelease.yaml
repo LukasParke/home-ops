@@ -32,6 +32,11 @@ spec:
                 interval: 5m
                 conditions:
                   - "[STATUS] == 200"
+              - name: Bifrost
+                url: "https://bifrost.${SECRET_DOMAIN}/health"
+                interval: 5m
+                conditions:
+                  - "[STATUS] == 200"
     controllers:
       gatus:
         strategy: Recreate

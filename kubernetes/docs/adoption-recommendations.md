@@ -100,7 +100,7 @@
 
 **Why it fits:**
 - You already run Gatus and manually curate `endpoints:` in `kubernetes/apps/default/gatus/app/helmrelease.yaml`.
-- Every new app requires a manual Gatus entry (we just added LiteLLM manually).
+- Every new app requires a manual Gatus entry (we just added Bifrost manually).
 - The sidecar would auto-generate endpoints from your existing HTTPRoutes and Services.
 
 **Effort:** Medium. Requires RBAC, shared `emptyDir` config volume, and moving Gatus to a Deployment model that can load a sidecar-generated include file.
@@ -143,7 +143,7 @@ Then embed `https://kromgo.parke.dev/badges/node_count` in Homepage or README.
 
 **Why it fits:**
 - Your node labels show `extensions.talos.dev/amdgpu` and the schematic likely includes `i915`/`xe`.
-- Useful if you run Plex transcoding, AI/ML workloads (you just deployed LiteLLM), or any GPU-accelerated containers.
+- Useful if you run Plex transcoding, AI/ML workloads (you just deployed Bifrost), or any GPU-accelerated containers.
 - Metrics: engine utilization, memory, frequency, power, temperature, fan speed.
 
 **Effort:** Low. Deploy as DaemonSet with ServiceMonitor.
@@ -161,7 +161,7 @@ Then embed `https://kromgo.parke.dev/badges/node_count` in Homepage or README.
 **What:** `volsync` is a volume snapshot replication operator; `kopia` is the backend it can use for encrypted, deduplicated backups.
 
 **Why it fits:**
-- Your cluster currently has **no backup solution** for stateful workloads (Postgres, Immich, Ghostfolio, Vaultwarden, Homepage, LiteLLM DB).
+- Your cluster currently has **no backup solution** for stateful workloads (Postgres, Immich, Ghostfolio, Vaultwarden, Homepage, Bifrost DB).
 - Upstream (`onedr0p/home-ops`) deploys both `volsync-system/volsync` and `volsync-system/kopia`.
 - cloudnative-pg has its own backups, but PVC-backed apps (Immich, Vaultwarden, Homepage) need something else.
 
