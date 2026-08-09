@@ -61,6 +61,11 @@ spec:
                   secretKeyRef:
                     name: cluster-secrets
                     key: GRAPHITI_BIFROST_VK
+              # json_schema mode returns objects missing required fields
+              # (e.g. 'entities' instead of 'extracted_entities') through the
+              # bifrost→llama.cpp conversion; json_object makes Graphiti inject
+              # the schema into the prompt instead (upstream-documented fix).
+              LLM_STRUCTURED_OUTPUT_MODE: json_object
               MODEL_NAME: talos/qwen3.6-35b-a3b
               EMBEDDER_MODEL: hephaestus/qwen3-embed
               EMBEDDING_DIMENSIONS: "1024"
