@@ -37,15 +37,15 @@ spec:
         containers:
           app:
             image:
-              # TEST BUILD of mcp_server@main (graphiti-core 0.29.3): fixes
-              # api_url threading (getzep/graphiti#1744) and structured output
-              # via OpenAIGenericClient (#1746). ttl.sh expires in 24h — move
-              # to a ghcr push (or the next upstream release) before relying on it.
-              repository: ttl.sh/graphiti-mcp-c6691775-4c6
-              # Immutable-ish tag per build — spegel's P2P mirror serves
-              # stale digests for re-pushed mutable tags even with
-              # pullPolicy: Always. Bump the tag on each test build.
-              tag: v2
+              # Build of mcp_server@main (graphiti-core 0.29.3): fixes api_url
+              # threading (getzep/graphiti#1744) and structured output via
+              # OpenAIGenericClient (#1746) not in any released image. Built
+              # with falkordb>=1.6,<2 + redis>=7,<8 pins (upstream Dockerfile's
+              # GRAPHITI_CORE_VERSION re-lock resolves broken versions).
+              # Replace with an upstream tag once zepai/knowledge-graph-mcp
+              # ships >1.0.2.
+              repository: ghcr.io/lukasparke/knowledge-graph-mcp
+              tag: 1.0.3-main
             env:
               CONFIG_PATH: /app/mcp/config/config.yaml
               # FalkorDB runs in the same container (supervisord).
