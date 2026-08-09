@@ -175,6 +175,15 @@ spec:
               url: http://graphiti.default.svc.cluster.local:8000/mcp/
             authType: none
             allowOnAllVirtualKeys: true
+          # Firecrawl web scraping/scraping via the in-cluster MCP adapter
+          # (the API itself is REST-only; firecrawl-mcp fronts it with
+          # streamable HTTP). No auth — in-cluster only.
+          - name: firecrawl
+            connectionType: http
+            httpConfig:
+              url: http://firecrawl-mcp.default.svc.cluster.local:3000/mcp
+            authType: none
+            allowOnAllVirtualKeys: true
           # SaaS hosted MCP servers — OAuth flow completed once via the
           # Bifrost dashboard after deploy (redirect_uri =
           # mcpExternalClientUrl above).
