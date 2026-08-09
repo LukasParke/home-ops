@@ -39,6 +39,12 @@ spec:
           secretKeyRef:
             name: cluster-secrets
             key: DELPHI_LLAMASWAP_API_KEY
+      # Seeded graphiti virtual key value (env.GRAPHITI_BIFROST_VK below).
+      - name: GRAPHITI_BIFROST_VK
+        valueFrom:
+          secretKeyRef:
+            name: cluster-secrets
+            key: GRAPHITI_BIFROST_VK
 
     image:
       # Always pin the tag - the chart will not start without it. Renovate
@@ -154,12 +160,49 @@ spec:
         disableDbPingsInHealth: true
 
       # Protect the Bifrost admin dashboard/API with creds from cluster-secrets
-      # (SOPS). Inference requests use virtual API keys; see docs.
+      # (SOPS). Inference requests use virtual API keys; see docs. On >=1.6.x a
+      # plain `Authorization: Bearer sk-bf-...` works for VK auth while the
+      # dashboard and /api routes stay behind admin basic-auth.
       authConfig:
         isEnabled: true
         existingSecret: cluster-secrets
         usernameKey: BIFROST_ADMIN_USERNAME
         passwordKey: BIFROST_ADMIN_PASSWORD
+
+      # Governance seeded from config.json (GitOps source of truth; seeded rows
+      # reconcile by hash, DB-only rows are preserved).
+      #
+      # NOTE: virtual keys created via the admin API can only reference
+      # DB-managed provider keys (key UUIDs); keys defined here in helm values
+      # are config-file keys and are invisible to API-created VKs. Seeding the
+      # VK from config.json lets key_ids reference config keys by name ("*").
+      governance:
+        virtualKeys:
+          - id: graphiti
+            name: graphiti
+            description: Graphiti shared agent memory (MCP server, default ns)
+            value: env.GRAPHITI_BIFROST_VK
+            is_active: true
+            provider_configs:
+              # Extraction LLM: fast 35B MoE, served on both GPU hosts.
+              - provider: talos
+                weight: 1
+                allowed_models: ["qwen3.6-35b-a3b"]
+                key_ids: ["*"]
+              - provider: cerberus
+                weight: 1
+                allowed_models: ["qwen3.6-35b-a3b", "gpt-oss-120b"]
+                key_ids: ["*"]
+              # Embeddings.
+              - provider: hephaestus
+                weight: 1
+                allowed_models: ["qwen3-embed"]
+                key_ids: ["*"]
+              # Reranker, reserved for future retrieval tuning.
+              - provider: delphi
+                weight: 1
+                allowed_models: ["bge-reranker-v2-m3"]
+                key_ids: ["*"]
 
     # Bifrost serves /health (liveness/readiness). disableDbPingsInHealth
     # means /health returns without pinging the DB.
