@@ -11,3 +11,5 @@ resources:
   - ./kube-prometheus-stack/ks.yaml
   - ./kromgo/ks.yaml
   - ./drm-exporter/ks.yaml
+  - ./loki/ks.yaml
+  - ./alloy/ks.yaml

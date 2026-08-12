@@ -1,0 +1,82 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: loki
+      version: "7.3.0"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: observability
+  values:
+    fullnameOverride: loki
+    # Single-binary Loki on the shared NFS PVC. When local NVMe storage
+    # exists, move this to the local StorageClass (Loki's TSDB prefers
+    # local disk) — change singleBinary.persistence.storageClass and let
+    # retention refill the new volume; old chunks are disposable.
+    deploymentMode: SingleBinary
+    loki:
+      auth_enabled: false
+      analytics:
+        reporting_enabled: false
+      commonConfig:
+        replication_factor: 1
+      storage:
+        type: filesystem
+      schemaConfig:
+        configs:
+          - from: "2024-04-01"
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+      limits_config:
+        retention_period: 14d
+      compactor:
+        working_directory: /var/loki/compactor
+        retention_enabled: true
+        delete_request_store: filesystem
+      ingester:
+        chunk_encoding: snappy
+    singleBinary:
+      replicas: 1
+      persistence:
+        enabled: true
+        storageClass: nfs
+        size: 20Gi
+        # Keep the PVC (and the Retain-policy PV) across scale-down/uninstall.
+        whenScaled: Retain
+        whenDeleted: Retain
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+    # Zero out the SimpleScalable components; single binary serves everything.
+    backend:
+      replicas: 0
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    gateway:
+      enabled: false
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+    lokiCanary:
+      enabled: false
+    test:
+      enabled: false
+    monitoring:
+      serviceMonitor:
+        enabled: true
