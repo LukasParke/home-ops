@@ -1,0 +1,112 @@
+---
+# Centaur's built-in OpenAI credential transform is deliberately scoped to
+# api.openai.com. This local adapter preserves the same credential boundary for
+# Bifrost: sandboxes send the placeholder token, while only this pod receives
+# the real Bifrost virtual key and forwards requests to the in-cluster service.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: centaur-bifrost
+data:
+  Caddyfile: |
+    :8080 {
+      @openai path /v1/*
+      handle @openai {
+        reverse_proxy http://bifrost.default.svc.cluster.local:8080 {
+          header_up Authorization "Bearer {env.BIFROST_API_KEY}"
+          header_up Host {upstream_hostport}
+        }
+      }
+      respond 404
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: centaur-bifrost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: centaur-bifrost
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: centaur-bifrost
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: adapter
+          image: docker.io/library/caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+          env:
+            - name: BIFROST_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cluster-secrets
+                  key: GRAPHITI_BIFROST_VK
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: config
+              mountPath: /etc/caddy
+              readOnly: true
+            - name: data
+              mountPath: /data
+            - name: runtime-config
+              mountPath: /config
+      volumes:
+        - name: config
+          configMap:
+            name: centaur-bifrost
+        - name: data
+          emptyDir: {}
+        - name: runtime-config
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: centaur-bifrost
+spec:
+  selector:
+    app.kubernetes.io/name: centaur-bifrost
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
