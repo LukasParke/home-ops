@@ -34,3 +34,28 @@ Slack is disabled for the initial deployment. To enable it:
 3. Add an external `HTTPRoute` for the Slackbot service.
 4. Configure Slack event subscriptions and interactivity to use
    `https://<external-host>/api/webhooks/slack`.
+
+## Discord
+
+The Discord workload is fully staged but remains disabled until its application
+values are available. It uses Discord's outbound Gateway connection and does not
+need a public route.
+
+1. Enable **Message Content Intent** for the Discord application.
+2. Add these keys to the `centaur-infra-env` document in
+   `centaur-secrets.sops.yaml`:
+
+   ```yaml
+   DISCORD_BOT_TOKEN: <bot-token>
+   DISCORD_PUBLIC_KEY: <application-public-key>
+   DISCORD_APPLICATION_ID: <application-id>
+   DISCORDBOT_API_KEY: <generated-service-key>
+   ```
+
+   Generate the internal service key with `openssl rand -hex 32`.
+3. Set `discordbot.guildAllowlist` in `helmrelease.yaml` to the permitted guild
+   ID, or a comma-separated list of guild IDs.
+4. Set `discordbot.enabled` to `true`.
+
+The upstream chart enforces one Discord replica with a `Recreate` strategy to
+prevent duplicate Gateway sessions during rollouts.

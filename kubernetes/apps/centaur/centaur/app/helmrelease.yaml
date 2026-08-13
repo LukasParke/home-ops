@@ -119,6 +119,24 @@ spec:
       # Enable after adding Slack credentials and publishing the webhook route.
       enabled: false
 
+    discordbot:
+      # Ready to enable once the Discord application values are added to the
+      # SOPS secret and guildAllowlist is populated.
+      enabled: false
+      image:
+        repository: ghcr.io/paradigmxyz/centaur/centaur-discordbot
+        tag: latest@sha256:f6d46feb0eab3b7a281120fd04ab347be5fb8bae4bc2b024fc590c08e0eb21de
+        pullPolicy: IfNotPresent
+      userName: centaur
+      guildAllowlist: ""
+      nameThreads: true
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
+
     networkPolicy:
       ingressControllerNamespaces:
         - network
