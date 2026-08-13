@@ -12,3 +12,4 @@ resources:
   - ./database
   - ./observability
   - ./forgejo
+  - ./centaur

@@ -1,0 +1,112 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: centaur
+spec:
+  chart:
+    spec:
+      chart: centaur
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: centaur
+      version: 0.1.116
+  interval: 1h
+  values:
+    fullnameOverride: centaur
+
+    secretManager:
+      existingSecretName: centaur-infra-env
+      envPrefix: ""
+
+    firewall:
+      existingCaSecretName: centaur-firewall-ca
+      existingCaKeySecretName: centaur-firewall-ca-key
+
+    ironProxy:
+      image:
+        repository: ghcr.io/paradigmxyz/centaur/centaur-iron-proxy
+        tag: latest@sha256:bd6d7a595197526172978a725815a97cc2d252b55f8fbe40c2f58ae86fb5898b
+        pullPolicy: IfNotPresent
+      secretSource: env
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+
+    console:
+      publicUrl: https://centaur.${SECRET_DOMAIN}
+      image:
+        repository: ghcr.io/paradigmxyz/centaur/centaur-console
+        tag: latest@sha256:a6313ad4dcd4f3a8ef9f20886c4954b723044397503b84276f61450b5cfeb48a
+        pullPolicy: IfNotPresent
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+      worker:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+
+    apiRs:
+      image:
+        repository: ghcr.io/paradigmxyz/centaur/centaur-api-rs
+        tag: latest@sha256:df17b0f02c7d800d75915007c3ce5cf11775b5d0843ce530261c1e0b31da8621
+        pullPolicy: IfNotPresent
+      sandboxWarmPoolSize: 1
+      sandboxRunningLimit: 3
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+    sandbox:
+      image:
+        repository: ghcr.io/paradigmxyz/centaur/centaur-agent
+        tag: latest@sha256:edb6d739ffd60a61fbebe35b38d18590d853a15a554b9ec6806cabd4560e6ea7
+        pullPolicy: IfNotPresent
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 4Gi
+
+    toolServer:
+      repo: paradigmxyz/centaur
+      ref: centaur-0.1.116
+      visibility: public
+
+    postgres:
+      persistence:
+        enabled: true
+        size: 20Gi
+        storageClassName: nfs
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 2Gi
+
+    slackbotv2:
+      # Enable after adding Slack credentials and publishing the webhook route.
+      enabled: false
+
+    networkPolicy:
+      ingressControllerNamespaces:
+        - network
+      metricsIngressSourceNamespaces:
+        - observability
