@@ -7,12 +7,12 @@ its Console internally at `https://centaur.${SECRET_DOMAIN}`.
 ## Initial setup
 
 The deployment includes generated SOPS-encrypted infrastructure credentials and
-a private firewall CA. Before running an agent, replace the placeholder
-`OPENAI_API_KEY`:
+a private firewall CA. Codex uses the local Bifrost deployment with
+`cerberus/gpt-oss-120b` by default. A dedicated in-cluster adapter injects the
+existing `GRAPHITI_BIFROST_VK`; the key is never exposed to sandbox pods.
 
-```sh
-sops kubernetes/apps/centaur/centaur/app/centaur-secrets.sops.yaml
-```
+The encrypted `OPENAI_API_KEY` sentinel exists only because Centaur requires its
+built-in OpenAI harness credential to initialize. Requests do not go to OpenAI.
 
 The initial Console user is
 `5702154+LukasParke@users.noreply.github.com`. Retrieve its generated password

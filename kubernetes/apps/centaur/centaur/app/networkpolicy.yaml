@@ -1,0 +1,70 @@
+---
+# Centaur dynamically applies a default-deny egress policy to every sandbox.
+# This additive policy permits one direct, local destination so Bifrost traffic
+# does not leave the cluster or pass through the internet-oriented iron-proxy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: centaur-sandbox-to-bifrost
+spec:
+  podSelector:
+    matchLabels:
+      centaur.ai/managed-by: api-rs
+    matchExpressions:
+      - key: centaur.ai/iron-proxy
+        operator: DoesNotExist
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: centaur-bifrost
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: centaur-bifrost
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: centaur-bifrost
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              centaur.ai/managed-by: api-rs
+            matchExpressions:
+              - key: centaur.ai/iron-proxy
+                operator: DoesNotExist
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: bifrost
+              app.kubernetes.io/name: bifrost
+              app.kubernetes.io/component: server
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

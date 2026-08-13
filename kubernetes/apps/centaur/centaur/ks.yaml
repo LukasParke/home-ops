@@ -6,6 +6,8 @@ metadata:
   name: centaur
 spec:
   dependsOn:
+    - name: bifrost
+      namespace: default
     - name: csi-driver-nfs
       namespace: kube-system
     - name: envoy-gateway
