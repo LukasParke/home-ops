@@ -31,7 +31,7 @@ data:
 
     llm:
       provider: "openai"  # OpenAI-compatible: Bifrost gateway → llama-swap hosts
-      model: $${MODEL_NAME:talos/qwen3.8-27b}
+      model: $${MODEL_NAME:talos/qwen3.8-27b-nothink}
       # qwen3.8 is a thinking model: reasoning consumed an entire 4096 budget
       # mid-extraction (observed 15.8k reasoning chars -> empty content),
       # failing Graphiti's response parse. 16384 leaves ample room for
