@@ -10,7 +10,7 @@
 # Zep Community Edition is deprecated (moved to getzep/zep legacy/).
 #
 # LLM/embedder go through the in-cluster Bifrost gateway (OpenAI-compatible):
-#   extraction:  talos/qwen3.6-35b-a3b (fast 35B MoE; cerberus also allowed on the VK)
+#   extraction:  talos/qwen3.8-27b (NVFP4+MTP on vLLM; cerberus also allowed on the VK)
 #   embeddings:  hephaestus/qwen3-embed (1024-dim)
 # Auth is a seeded Bifrost virtual key (see bifrost helmrelease governance
 # block), passed as the standard OpenAI Bearer token.
