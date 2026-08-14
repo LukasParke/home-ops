@@ -197,7 +197,7 @@ spec:
               # Extraction LLM: Qwen3.8-27B (NVFP4+MTP) on talos; 35B MoE fallback on cerberus.
               - provider: talos
                 weight: 1
-                allowed_models: ["qwen3.8-27b", "qwen3.8-27b-nothink"]
+                allowed_models: ["qwen3.8-27b"]
                 key_ids: ["*"]
               - provider: cerberus
                 weight: 1

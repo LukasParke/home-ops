@@ -71,7 +71,7 @@ spec:
               # at ~76 t/s under grammar, vs ~6 t/s for gpt-oss-120b (GBNF costs
               # it 6x). It also frees cerberus to keep deepseek-v4-flash
               # resident without extraction-driven evictions.
-              MODEL_NAME: talos/qwen3.8-27b-nothink
+              MODEL_NAME: talos/qwen3.8-27b
               # json_schema via llama.cpp GBNF works on talos/qwen3.8-27b once
               # Bifrost's MCP clients stopped injecting tools into every VK's
               # requests (allow_on_all_virtual_keys=false, 2026-08-14): tools +
