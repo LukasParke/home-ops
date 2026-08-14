@@ -72,10 +72,14 @@ spec:
               # it 6x). It also frees cerberus to keep deepseek-v4-flash
               # resident without extraction-driven evictions.
               MODEL_NAME: talos/qwen3.8-27b
-              # main auto-selects OpenAIGenericClient for non-OpenAI api_url
-              # and implements structured_output_mode; json_schema rides
-              # llama.cpp's grammar enforcement (verified conformant).
-              LLM_STRUCTURED_OUTPUT_MODE: json_schema
+              # json_schema via llama.cpp GBNF breaks on talos when Bifrost's
+              # MCP gateway injects tools into the request: llama.cpp b10297's
+              # grammar generator emits invalid GBNF for tools+schema combined
+              # (tools-only and schema-only both fine; verified 2026-08-14).
+              # json_object avoids the schema grammar entirely; Graphiti's
+              # OpenAIGenericClient strips code fences and Pydantic-validates,
+              # so conformance is still enforced client-side.
+              LLM_STRUCTURED_OUTPUT_MODE: json_object
               EMBEDDER_MODEL: hephaestus/qwen3-embed
               EMBEDDING_DIMENSIONS: "1024"
             probes:
