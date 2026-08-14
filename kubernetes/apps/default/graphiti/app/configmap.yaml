@@ -31,7 +31,7 @@ data:
 
     llm:
       provider: "openai"  # OpenAI-compatible: Bifrost gateway → llama-swap hosts
-      model: $${MODEL_NAME:talos/qwen3.6-35b-a3b}
+      model: $${MODEL_NAME:talos/qwen3.8-27b}
       max_tokens: 4096
       # llama.cpp enforces json_schema via GBNF grammars, so the default is
       # safe. If extraction errors appear, set LLM_STRUCTURED_OUTPUT_MODE=json_object.

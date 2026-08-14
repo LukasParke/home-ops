@@ -194,10 +194,10 @@ spec:
             value: env.GRAPHITI_BIFROST_VK
             is_active: true
             provider_configs:
-              # Extraction LLM: fast 35B MoE, served on both GPU hosts.
+              # Extraction LLM: Qwen3.8-27B (NVFP4+MTP) on talos; 35B MoE fallback on cerberus.
               - provider: talos
                 weight: 1
-                allowed_models: ["qwen3.6-35b-a3b"]
+                allowed_models: ["qwen3.8-27b"]
                 key_ids: ["*"]
               - provider: cerberus
                 weight: 1
