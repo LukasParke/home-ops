@@ -65,12 +65,13 @@ spec:
                   secretKeyRef:
                     name: cluster-secrets
                     key: GRAPHITI_BIFROST_VK
-              # gpt-oss-120b returns schema-conformant structured output
-              # through bifrost→llama.cpp (verified); qwen3.6-35b-a3b does
-              # not (returns prose/raw lists/wrong keys, failing Pydantic
-              # validation), so it can't be used for extraction despite being
-              # faster. It remains on the VK allowlist for non-extraction use.
-              MODEL_NAME: cerberus/gpt-oss-120b
+              # qwen3.8-27b on talos is the extraction model as of 2026-08-14:
+              # schema-conformant via llama.cpp GBNF (verified with a Graphiti-
+              # shaped strict schema: valid entities+edges, correct enums/keys)
+              # at ~76 t/s under grammar, vs ~6 t/s for gpt-oss-120b (GBNF costs
+              # it 6x). It also frees cerberus to keep deepseek-v4-flash
+              # resident without extraction-driven evictions.
+              MODEL_NAME: talos/qwen3.8-27b
               # main auto-selects OpenAIGenericClient for non-OpenAI api_url
               # and implements structured_output_mode; json_schema rides
               # llama.cpp's grammar enforcement (verified conformant).
