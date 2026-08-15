@@ -31,10 +31,10 @@ data:
 
     llm:
       provider: "openai"  # OpenAI-compatible: Bifrost gateway → llama-swap hosts
-      model: $${MODEL_NAME:delphi/gpt-oss-20b}
-      # gpt-oss-20b is a thinking model: reasoning can otherwise consume the
-      # entire extraction budget before the structured answer. 16384 leaves
-      # ample room for reasoning + the JSON response.
+      model: $${MODEL_NAME:hephaestus/qwen3-4b}
+      # qwen3-4b: small non-thinking model preferred for extraction — thinking
+      # models (e.g. gpt-oss-20b) can consume the entire extraction budget
+      # before the structured answer. 16384 leaves ample room either way.
       max_tokens: 16384
       # llama.cpp enforces json_schema via GBNF grammars, so the default is
       # safe. If extraction errors appear, set LLM_STRUCTURED_OUTPUT_MODE=json_object.
