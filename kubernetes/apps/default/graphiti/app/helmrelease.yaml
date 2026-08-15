@@ -10,7 +10,7 @@
 # Zep Community Edition is deprecated (moved to getzep/zep legacy/).
 #
 # LLM/embedder go through the in-cluster Bifrost gateway (OpenAI-compatible):
-#   extraction:  talos/qwen3.8-27b (NVFP4+MTP on vLLM; cerberus also allowed on the VK)
+#   extraction:  delphi/gpt-oss-20b (dedicated to Graphiti; cerberus also allowed on the VK)
 #   embeddings:  hephaestus/qwen3-embed (1024-dim)
 # Auth is a seeded Bifrost virtual key (see bifrost helmrelease governance
 # block), passed as the standard OpenAI Bearer token.
@@ -65,20 +65,17 @@ spec:
                   secretKeyRef:
                     name: cluster-secrets
                     key: GRAPHITI_BIFROST_VK
-              # qwen3.8-27b on talos is the extraction model as of 2026-08-14:
-              # schema-conformant via llama.cpp GBNF (verified with a Graphiti-
-              # shaped strict schema: valid entities+edges, correct enums/keys)
-              # at ~76 t/s under grammar, vs ~6 t/s for gpt-oss-120b (GBNF costs
-              # it 6x). It also frees cerberus to keep deepseek-v4-flash
-              # resident without extraction-driven evictions.
-              MODEL_NAME: talos/qwen3.8-27b
-              # json_schema via llama.cpp GBNF works on talos/qwen3.8-27b once
-              # Bifrost's MCP clients stopped injecting tools into every VK's
-              # requests (allow_on_all_virtual_keys=false, 2026-08-14): tools +
-              # json_schema combined generate invalid GBNF on llama.cpp b10297;
-              # schema-only (now the graphiti VK's reality) is fine and gives
-              # grammar-enforced conformance. json_object was tried and reverted:
-              # it passed NodeResolutions validation only intermittently.
+              # gpt-oss-20b on Delphi is the extraction model as of 2026-08-15:
+              # actual Graphiti entity/edge prompts returned schema-valid JSON
+              # through llama.cpp GBNF (3.6s entities, 5.5s edges). Dedicating
+              # Delphi leaves talos/qwen3.8-27b free for Hermes and prevents
+              # Graphiti's 10-slot semaphore from consuming the shared agent model.
+              MODEL_NAME: delphi/gpt-oss-20b
+              # json_schema via llama.cpp GBNF works on delphi/gpt-oss-20b with
+              # the graphiti VK because Bifrost no longer injects MCP tools into
+              # VK requests (allow_on_all_virtual_keys=false). Keep schema mode:
+              # json_object was tried and reverted after intermittent
+              # NodeResolutions validation failures.
               LLM_STRUCTURED_OUTPUT_MODE: json_schema
               EMBEDDER_MODEL: hephaestus/qwen3-embed
               EMBEDDING_DIMENSIONS: "1024"

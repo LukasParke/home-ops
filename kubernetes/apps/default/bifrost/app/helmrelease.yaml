@@ -194,11 +194,13 @@ spec:
             value: env.GRAPHITI_BIFROST_VK
             is_active: true
             provider_configs:
-              # Extraction LLM: Qwen3.8-27B (NVFP4+MTP) on talos; 35B MoE fallback on cerberus.
-              - provider: talos
+              # Dedicated extraction LLM on Delphi; Talos remains reserved for agent traffic.
+              # Keep the reranker on the same provider for future retrieval tuning.
+              - provider: delphi
                 weight: 1
-                allowed_models: ["qwen3.8-27b"]
+                allowed_models: ["gpt-oss-20b", "bge-reranker-v2-m3"]
                 key_ids: ["*"]
+              # Fallback coding models on cerberus.
               - provider: cerberus
                 weight: 1
                 allowed_models: ["qwen3.6-35b-a3b", "gpt-oss-120b"]
@@ -207,11 +209,6 @@ spec:
               - provider: hephaestus
                 weight: 1
                 allowed_models: ["qwen3-embed"]
-                key_ids: ["*"]
-              # Reranker, reserved for future retrieval tuning.
-              - provider: delphi
-                weight: 1
-                allowed_models: ["bge-reranker-v2-m3"]
                 key_ids: ["*"]
 
     # Bifrost serves /health (liveness/readiness). disableDbPingsInHealth
