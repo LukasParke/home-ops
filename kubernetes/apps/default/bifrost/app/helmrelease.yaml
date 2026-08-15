@@ -194,7 +194,8 @@ spec:
             value: env.GRAPHITI_BIFROST_VK
             is_active: true
             provider_configs:
-              # Dedicated extraction LLM on Delphi; Talos remains reserved for agent traffic.
+              # Fallback extraction LLM on Delphi (superseded 2026-08-15 by
+              # hephaestus/qwen3-4b as the dedicated Graphiti host).
               # Keep the reranker on the same provider for future retrieval tuning.
               - provider: delphi
                 weight: 1
@@ -205,10 +206,10 @@ spec:
                 weight: 1
                 allowed_models: ["qwen3.6-35b-a3b", "gpt-oss-120b"]
                 key_ids: ["*"]
-              # Embeddings.
+              # Dedicated Graphiti host: extraction LLM + embeddings.
               - provider: hephaestus
                 weight: 1
-                allowed_models: ["qwen3-embed"]
+                allowed_models: ["qwen3-embed", "qwen3-4b"]
                 key_ids: ["*"]
 
     # Bifrost serves /health (liveness/readiness). disableDbPingsInHealth
