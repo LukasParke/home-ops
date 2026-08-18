@@ -1,0 +1,17 @@
+---
+# Per-app VolSync (restic) backup. Include this component in an app's namespace
+# kustomization (or its app kustomization) and provide substitutions on the app's
+# Flux Kustomization:
+#
+#   postBuild:
+#     substitute:
+#       VOLSYNC_APP: radarr        # restic repo name: rest-server path + snap tag
+#       VOLSYNC_PVC: radarr        # source PVC to back up
+#       VOLSYNC_SCHEDULE: "0 3 * * *"
+#
+# See kubernetes/docs/rook-ceph-migration.md for the full backup/restore flow.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./secret.sops.yaml
+  - ./replicationsource.yaml

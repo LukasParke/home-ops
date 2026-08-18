@@ -12,3 +12,5 @@ resources:
   - ./database
   - ./observability
   - ./forgejo
+  - ./rook-ceph
+  - ./volsync-system

@@ -1,0 +1,154 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rook-ceph-cluster
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: rook-ceph-cluster
+      version: v1.20.4
+      sourceRef:
+        kind: HelmRepository
+        name: rook-release
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    # Never let Helm roll back a partially-upgraded Ceph cluster
+    # automatically; reconcile fixes forward instead.
+    remediation:
+      retries: 3
+      remediateLastFailure: false
+  values:
+    operatorNamespace: rook-ceph
+
+    toolbox:
+      enabled: true
+
+    monitoring:
+      enabled: true
+      createPrometheusRules: true
+
+    cephClusterSpec:
+      dataDirHostPath: /var/lib/rook
+
+      mon:
+        count: 3
+        allowMultiplePerNode: false
+
+      mgr:
+        count: 2
+
+      dashboard:
+        enabled: false
+
+      # Single shared 2.5GbE link per node; no separate cluster network.
+      network:
+        connections:
+          encryption:
+            enabled: false
+          compression:
+            enabled: false
+
+      # Only the dedicated 500GB NVMe drives, one per node, selected by
+      # stable by-id path (device enumeration put them on nvme0n1 on at least
+      # one node, so name-based filters are unsafe). The 1TB BIWIN M350 stays
+      # the Talos system disk everywhere — do NOT reference these disks in
+      # Talos machine config (machine.disks) either; Talos would wipe them for
+      # its own user volumes.
+      # Find paths with: talosctl -n <ip> ls -l /dev/disk/by-id/
+      storage:
+        useAllNodes: false
+        useAllDevices: false
+        nodes:
+          - name: zeus
+            devices:
+              - name: /dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_26170R806191
+          - name: poseidon
+            devices:
+              - name: /dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_26170R801165
+          - name: hades
+            devices:
+              - name: /dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_26170R800413
+
+      # OSDs/mon/mgr carry priority classes and Rook-managed PDBs so tuppr
+      # Talos upgrades drain safely and recovery I/O stays bounded.
+      disruptionManagement:
+        managePodBudgets: true
+        osdMaintenanceTimeout: 30
+
+      priorityClassNames:
+        mon: system-node-critical
+        osd: system-node-critical
+        mgr: system-cluster-critical
+
+      resources:
+        mon:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            memory: 2Gi
+        mgr:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        osd:
+          requests:
+            cpu: 100m
+            memory: 2Gi
+          limits:
+            memory: 4Gi
+        prepareosd:
+          requests:
+            cpu: 250m
+            memory: 100Mi
+          limits:
+            memory: 1Gi
+
+    cephBlockPools:
+      - name: ceph-rbd
+        spec:
+          failureDomain: host
+          replicated:
+            size: 3
+            requireSafeReplicaSize: true
+        storageClass:
+          enabled: true
+          name: ceph-rbd
+          # Not the cluster-wide default: migration off `nfs` is explicit,
+          # per-workload. Retain matches the existing `nfs` class posture so
+          # deleted PVCs never destroy data automatically.
+          isDefault: false
+          reclaimPolicy: Retain
+          allowVolumeExpansion: true
+          volumeBindingMode: Immediate
+          parameters:
+            imageFormat: "2"
+            imageFeatures: layering
+            csi.storage.k8s.io/fstype: ext4
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-publish-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-publish-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+            csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+
+    # VolumeSnapshotClass for ceph-rbd — required for VolSync restic movers
+    # (copyMethod: Snapshot) backing up live RWO volumes.
+    cephBlockPoolsVolumeSnapshotClass:
+      enabled: true
+      name: ceph-rbd
+      isDefault: false
+      deletionPolicy: Delete
+
+    # RBD only. Media/bulk files stay on Unraid NFS; no CephFS or RGW today.
+    cephFileSystems: []
+    cephObjectStores: []

@@ -1,0 +1,25 @@
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: ${VOLSYNC_APP}
+spec:
+  sourcePVC: ${VOLSYNC_PVC}
+  trigger:
+    schedule: "${VOLSYNC_SCHEDULE}"
+  restic:
+    repository: volsync-restic
+    # Snapshot works against the ceph-rbd VolumeSnapshotClass, so live RWO
+    # volumes back up without app downtime.
+    copyMethod: Snapshot
+    volumeSnapshotClassName: ceph-rbd
+    cacheStorageClassName: ceph-rbd
+    cacheCapacity: 2Gi
+    pruneIntervalDays: 7
+    retain:
+      daily: 7
+      within: 3d
+    moverSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      fsGroup: 0
