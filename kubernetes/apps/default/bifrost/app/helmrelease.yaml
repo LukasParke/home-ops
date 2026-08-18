@@ -95,7 +95,7 @@ spec:
       # models: ["*"] per key: llama-swap's own config is the source of truth
       # for which models a host serves (GET /v1/models), so adding a model to
       # a host needs no Bifrost change. Clients must address models as
-      # `<host>/<model>` (e.g. `talos/ornith-35b`) — with four providers a
+      # `<host>/<model>` (e.g. `talos/qwen3.8-27b`) — with four providers a
       # bare model name cannot be mapped to a host. Keys live in
       # cluster-secrets.sops.yaml and are referenced as env.<KEY>.
       providers:
