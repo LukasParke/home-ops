@@ -28,6 +28,9 @@ spec:
             # Repos live at per-PVC subpaths (rest://host:8000/<ns>-<pvc>);
             # disable repo listing and prevent escaping --path.
             - --private-repos
+            # Service is cluster-internal; Restic still encrypts every
+            # repository using the SOPS-managed RESTIC_PASSWORD.
+            - --no-auth
           ports:
             - name: http
               containerPort: 8000
