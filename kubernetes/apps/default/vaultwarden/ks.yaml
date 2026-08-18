@@ -8,9 +8,17 @@ spec:
   dependsOn:
     - name: csi-driver-nfs
       namespace: kube-system
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/vaultwarden/app
   postBuild:
+    substitute:
+      VOLSYNC_APP: vaultwarden
+      VOLSYNC_PVC: vaultwarden
+      VOLSYNC_SCHEDULE: "55 3 * * *"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

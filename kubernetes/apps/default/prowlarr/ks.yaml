@@ -8,9 +8,17 @@ spec:
   dependsOn:
     - name: csi-driver-nfs
       namespace: kube-system
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/prowlarr/app
   postBuild:
+    substitute:
+      VOLSYNC_APP: prowlarr
+      VOLSYNC_PVC: prowlarr
+      VOLSYNC_SCHEDULE: "30 3 * * *"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

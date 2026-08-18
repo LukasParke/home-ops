@@ -8,7 +8,7 @@ spec:
   trigger:
     schedule: "${VOLSYNC_SCHEDULE}"
   restic:
-    repository: volsync-restic
+    repository: ${VOLSYNC_APP}-volsync-restic
     # Snapshot works against the ceph-rbd VolumeSnapshotClass, so live RWO
     # volumes back up without app downtime.
     copyMethod: Snapshot

@@ -8,9 +8,17 @@ spec:
   dependsOn:
     - name: csi-driver-nfs
       namespace: kube-system
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/graphiti/app
   postBuild:
+    substitute:
+      VOLSYNC_APP: graphiti
+      VOLSYNC_PVC: graphiti
+      VOLSYNC_SCHEDULE: "10 3 * * *"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

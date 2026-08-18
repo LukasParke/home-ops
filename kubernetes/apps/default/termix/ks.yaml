@@ -10,9 +10,17 @@ spec:
       namespace: kube-system
     - name: termix-guacd
       namespace: default
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/termix/app
   postBuild:
+    substitute:
+      VOLSYNC_APP: termix
+      VOLSYNC_PVC: termix
+      VOLSYNC_SCHEDULE: "50 3 * * *"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
