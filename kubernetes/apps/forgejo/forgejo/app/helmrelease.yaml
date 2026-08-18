@@ -14,10 +14,10 @@ spec:
       requests:
         memory: 256Mi
     global:
-      storageClass: nfs
+      storageClass: ceph-rbd
     persistence:
       enabled: true
-      storageClass: nfs
+      storageClass: ceph-rbd
       size: 10Gi
       accessModes:
         - ReadWriteOnce
