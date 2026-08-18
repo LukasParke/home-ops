@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: restic-repo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs
+  resources:
+    requests:
+      # NFS quota-less; this is a bookkeeping label only. Restic repos for all
+      # VolSync'd PVCs land under volsync-system/restic-repo on the NAS share.
+      storage: 250Gi
