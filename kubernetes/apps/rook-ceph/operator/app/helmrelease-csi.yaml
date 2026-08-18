@@ -1,0 +1,54 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ceph-csi-drivers
+spec:
+  dependsOn:
+    - name: rook-ceph-operator
+  interval: 1h
+  chart:
+    spec:
+      chart: ceph-csi-drivers
+      version: 1.0.4
+      sourceRef:
+        kind: HelmRepository
+        name: ceph-csi-operator
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Rook owns these resources and keeps them synchronized with the cluster.
+    cephConnections: []
+    clientProfiles: []
+
+    operatorConfig:
+      create: true
+      name: ceph-csi-operator-config
+      driverSpecDefaults:
+        imageSet:
+          name: rook-csi-operator-image-set-configmap
+        fsGroupPolicy: File
+        nodePlugin:
+          priorityClassName: system-node-critical
+          kubeletDirPath: /var/lib/kubelet
+        controllerPlugin:
+          priorityClassName: system-cluster-critical
+          replicas: 2
+
+    # RBD is the only Ceph interface used by this cluster. The drivers chart
+    # supplies the static ServiceAccounts and RBAC omitted by rook-ceph 1.20.
+    drivers:
+      rbd:
+        enabled: true
+        name: rook-ceph.rbd.csi.ceph.com
+      cephfs:
+        enabled: false
+      nfs:
+        enabled: false
+      nvmeof:
+        enabled: false
