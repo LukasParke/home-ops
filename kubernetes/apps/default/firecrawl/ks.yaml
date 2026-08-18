@@ -7,9 +7,17 @@ spec:
   dependsOn:
     - name: csi-driver-nfs
       namespace: kube-system
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/firecrawl/app
   postBuild:
+    substitute:
+      VOLSYNC_APP: firecrawl
+      VOLSYNC_PVC: firecrawl-nuq-postgres-pvc
+      VOLSYNC_SCHEDULE: "0 3 * * *"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

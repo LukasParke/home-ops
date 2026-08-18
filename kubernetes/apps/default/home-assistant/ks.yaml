@@ -8,9 +8,17 @@ spec:
   dependsOn:
     - name: csi-driver-nfs
       namespace: kube-system
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/default/home-assistant/app
   postBuild:
+    substitute:
+      VOLSYNC_APP: home-assistant
+      VOLSYNC_PVC: home-assistant
+      VOLSYNC_SCHEDULE: "15 3 * * *"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

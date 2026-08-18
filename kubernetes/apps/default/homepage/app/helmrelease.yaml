@@ -311,6 +311,9 @@ spec:
                   httpGet:
                     path: /
                     port: &port 3000
+                    httpHeaders:
+                      - name: Host
+                        value: homepage
                   initialDelaySeconds: 10
                   periodSeconds: 10
               readiness: *probes

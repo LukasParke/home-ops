@@ -5,7 +5,7 @@
 #
 #   postBuild:
 #     substitute:
-#       VOLSYNC_APP: radarr        # restic repo name: rest-server path + snap tag
+#       VOLSYNC_APP: radarr        # unique Secret, restic repo path, and snapshot tag
 #       VOLSYNC_PVC: radarr        # source PVC to back up
 #       VOLSYNC_SCHEDULE: "0 3 * * *"
 #

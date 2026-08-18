@@ -185,7 +185,7 @@ planned follow-up.
    spec:
      trigger: {}
      restic:
-       repository: volsync-restic
+       repository: <app>-volsync-restic
        destinationPVC: <pvc-name>
        copyMethod: Direct
        accessModes: [ReadWriteOnce]
