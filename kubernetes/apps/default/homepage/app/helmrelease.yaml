@@ -300,7 +300,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v1.13.1
+              tag: v2.0.0
             env:
               HOMEPAGE_ALLOWED_HOSTS: "homepage.${SECRET_DOMAIN},homepage.default.svc.cluster.local,homepage.default.svc,homepage"
             probes:
