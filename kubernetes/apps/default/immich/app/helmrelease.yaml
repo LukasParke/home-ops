@@ -29,7 +29,7 @@ spec:
           enabled: true
           size: 2Gi
           type: persistentVolumeClaim
-          storageClass: nfs
+          storageClass: ceph-rbd
           accessMode: ReadWriteOnce
     server:
       route:
@@ -78,5 +78,5 @@ spec:
           enabled: true
           size: 8Gi
           type: persistentVolumeClaim
-          storageClass: nfs
+          storageClass: ceph-rbd
           accessMode: ReadWriteOnce

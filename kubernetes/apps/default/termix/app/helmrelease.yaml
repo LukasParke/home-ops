@@ -83,7 +83,7 @@ spec:
       data:
         enabled: true
         type: persistentVolumeClaim
-        storageClass: nfs
+        storageClass: ceph-rbd
         accessMode: ReadWriteOnce
         size: 5Gi
         globalMounts:

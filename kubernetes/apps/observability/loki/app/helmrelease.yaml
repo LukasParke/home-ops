@@ -49,7 +49,7 @@ spec:
       replicas: 1
       persistence:
         enabled: true
-        storageClass: nfs
+        storageClass: ceph-rbd
         size: 20Gi
         # Keep the PVC (and the Retain-policy PV) across scale-down/uninstall.
         whenScaled: Retain
