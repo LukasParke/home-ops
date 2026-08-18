@@ -5,11 +5,9 @@ kind: Kustomization
 metadata:
   name: rook-ceph-cluster
 spec:
-  # Suspended until the 3x 500GB NVMe drives are installed and visible as
-  # /dev/nvme1n1 on each node (see kubernetes/docs/rook-ceph-migration.md).
-  # Enable with: flux -n rook-ceph resume kustomization rook-ceph-cluster
-  # (then flip this to false and commit to make it durable in Git).
-  suspend: true
+  # Drives verified on all 3 nodes (per-node by-id paths in
+  # cluster/app/helmrelease.yaml); cluster builds on merge.
+  suspend: false
   dependsOn:
     - name: rook-ceph-operator
       namespace: rook-ceph
