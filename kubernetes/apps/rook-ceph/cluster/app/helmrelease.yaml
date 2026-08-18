@@ -53,14 +53,26 @@ spec:
           compression:
             enabled: false
 
-      # Only the dedicated 500GB NVMe drives (nvme1n1 on every node).
-      # nvme0n1 is the Talos system disk (BIWIN M350 1TB) and must stay untouched.
-      # Do NOT reference these disks in Talos machine config (machine.disks) —
-      # Talos would wipe them for its own user volumes.
+      # Only the dedicated 500GB NVMe drives, one per node, selected by
+      # stable by-id path (device enumeration put them on nvme0n1 on at least
+      # one node, so name-based filters are unsafe). The 1TB BIWIN M350 stays
+      # the Talos system disk everywhere — do NOT reference these disks in
+      # Talos machine config (machine.disks) either; Talos would wipe them for
+      # its own user volumes.
+      # Find paths with: talosctl -n <ip> ls -l /dev/disk/by-id/
       storage:
-        useAllNodes: true
+        useAllNodes: false
         useAllDevices: false
-        deviceFilter: "^nvme1n1$"
+        nodes:
+          - name: zeus
+            devices:
+              - name: /dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_26170R806191
+          - name: poseidon
+            devices:
+              - name: /dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_26170R801165
+          - name: hades
+            devices:
+              - name: /dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_26170R800413
 
       # OSDs/mon/mgr carry priority classes and Rook-managed PDBs so tuppr
       # Talos upgrades drain safely and recovery I/O stays bounded.

@@ -34,18 +34,23 @@ Safety properties of this plan:
 
 ## Phase 1 — build Ceph
 
-1. Verify each node sees the new drive as `nvme1n1` (system disk `nvme0n1` is
-   the 1TB BIWIN — do not touch it):
+1. Verify each node sees the new drive and record its by-id path. Enumeration
+   is NOT stable across installs (zeus's new drive came up as `nvme0n1`,
+   pushing the system disk to `nvme1n1`), so the CephCluster selects drives by
+   by-id path, not kernel name:
 
    ```sh
-   for n in 10.10.10.61 10.10.10.62 10.10.10.63; do talosctl -n $n get disks; done
+   talosctl -n <ip> get disks
+   talosctl -n <ip> ls -l /dev/disk/by-id/ | grep Sandisk
    ```
 
-   Expect a new ~500GB `nvme1n1` per node. If a node enumerates differently,
-   fix `cephClusterSpec.storage.deviceFilter` in
-   [`cluster/app/helmrelease.yaml`](../apps/rook-ceph/cluster/app/helmrelease.yaml)
-   before proceeding. Do **not** add the drives to Talos `machine.disks` —
-   Talos would claim them for its own user volumes.
+   Confirm each node's `/dev/disk/by-id/nvme-Sandisk_Optimus_5100_500GB_<serial>`
+   matches the per-node entries in
+   [`cluster/app/helmrelease.yaml`](../apps/rook-ceph/cluster/app/helmrelease.yaml);
+   fill in any `REPLACE_ME` serials and push before unsuspending. The 1TB
+   BIWIN is the Talos system disk everywhere — never hand it to Rook. Do
+   **not** add the drives to Talos `machine.disks` — Talos would claim them
+   for its own user volumes.
 
 2. Enable the cluster (make the Git change durable, don't just resume):
 
