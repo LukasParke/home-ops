@@ -7,7 +7,7 @@ spec:
   instances: 2
   storage:
     size: 20Gi
-    storageClass: nfs
+    storageClass: ceph-rbd
   imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
   postgresql:
     shared_preload_libraries:
