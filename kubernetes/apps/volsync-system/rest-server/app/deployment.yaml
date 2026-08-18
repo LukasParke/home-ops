@@ -21,6 +21,8 @@ spec:
       containers:
         - name: rest-server
           image: docker.io/restic/rest-server:0.14.0
+          # Image has no ENTRYPOINT; the binary must be the command.
+          command: ["rest-server"]
           args:
             - --path=/data
             # Repos live at per-PVC subpaths (rest://host:8000/<ns>-<pvc>);
