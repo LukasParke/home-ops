@@ -1,13 +1,13 @@
 # Multi-Host Agent Swarm — Fleet Architecture Plan
 
-## The Fleet (15 models, 4 hosts, 1 Bifrost proxy)
+## The Fleet (19 models, 4 hosts, 1 Bifrost proxy)
 
 ```
                          ┌─────────────────────────────────┐
                          │     Bifrost Proxy (k8s)         │
                          │  bifrost.${SECRET_DOMAIN}        │
                          │  OpenAI-compatible API          │
-                         │  15 models, unified routing     │
+                         │  19 models, unified routing     │
                          └───────────┬─────────────────────┘
                                      │
               ┌──────────────────────┼──────────────────────┐
@@ -21,10 +21,9 @@
      │              MODEL ROUTING (by task tier)               │
      │                                                         │
      │  TIER 1 — Planner/CEO:    gpt-oss-120b (cerberus)       │
-     │  TIER 2 — Team Lead:      qwen3-coder-next-80b (HIP)    │
-     │  TIER 3 — Fast Workers:   gpt-oss-20b, ornith-9b        │
-     │  TIER 4 — Specialists:    deepseek-r1, vision models    │
-     │  TIER 5 — Overnight:     qwen3-235b-overnight           │
+     │  TIER 2 — Team Lead:      qwen3-coder-next-80b          │
+     │  TIER 3 — Fast Workers:   qwen3.8-27b, qwen3-4b         │
+     │  TIER 4 — Specialists:    reasoning, vision, RAG        │
      └─────────────────────────────────────────────────────────┘
 ```
 
@@ -32,104 +31,47 @@
 
 ## 1. Model Routing Strategy
 
-Each model has a "best role" based on its speed, intelligence, and capabilities:
+The live llama-swap inventory was verified through each host's `/v1/models`
+endpoint on 2026-08-18:
 
-| Role | Model | Host | tok/s | Why |
-|---|---|---|---|---|
-| **CEO/Planner** | gpt-oss-120b | cerberus | 57 | Highest intelligence, reasoning_effort=high, 65k ctx |
-| **Team Lead (coding)** | qwen3-coder-next-80b | cerberus | 49 | HIP backend, 131k ctx, terse agentic coder, resident |
-| **Fast Coder** | ornith-35b | talos | 324 | MoE+MTP, agentic coding, 262k ctx, default on talos |
-| **Fastest Coder** | gpt-oss-20b | talos | 350 | Fastest in fleet, 131k ctx, long-prompt/short-answer |
-| **Agentic Coder** | devstral-24b | talos | 96 | Purpose-built for multi-file agentic coding |
-| **Small Fast Coder** | ornith-9b | hephaestus | 136 | DFlash spec-decode, fast, fully VRAM-resident |
-| **Vision (small)** | gemma-4-12b | hephaestus | 136 | MTP+vision, fast, default on hephaestus |
-| **Vision (mid)** | mistral-small-3.2-24b-vision | delphi | 47.5 | Q3+mmproj, 16k ctx |
-| **Generalist** | mistral-small-3.2-24b | delphi | ~45 | Q4_K_M, strong general chat, default on delphi |
-| **Reasoning** | deepseek-r1-14b | delphi | 48.7 | Math/logic, thinking trace, 32k ctx |
-| **Vision (large)** | gemma-4-26b-a4b | cerberus | 104 | MoE A4B+MTP+vision, coexists with coder |
-| **Overnight Max-Q** | qwen3-235b-overnight | cerberus | 17.5 | 235B MoE, perfect 5/5 quality, 32k ctx |
-| **Embeddings** | qwen3-embed | hephaestus | 2.9 docs/s | CPU, always-on, 1024-dim |
-| **Reranker** | bge-reranker-v2-m3 | delphi | 97 docs/s | Persistent, warmup at startup |
+| Host | Bifrost provider | Available models |
+|---|---|---|
+| Cerberus | `cerberus` | `deepseek-v4-flash`, `gemma-4-26b-a4b`, `glm-4.7-flash`, `gpt-oss-120b`, `mistral-small-4`, `qwen3-coder-next-80b`, `qwen3.6-35b-a3b` |
+| Talos | `talos` | `qwen3.8-27b` |
+| Hephaestus | `hephaestus` | `gemma-4-12b`, `ornith-9b`, `qwen3-4b`, `qwen3-embed` |
+| Delphi | `delphi` | `bge-reranker-v2-m3`, `deepseek-r1-14b`, `gemma-4-26b`, `gpt-oss-20b`, `mistral-small-3.2-24b`, `mistral-small-3.2-24b-vision`, `phi-4` |
+
+Bifrost keys use `models: ["*"]`, so llama-swap remains the source of truth and
+new host models appear without a Bifrost deployment. The database-managed
+`agents-default` virtual key grants all models on all four providers. Clients
+select a model as `<provider>/<model>`, such as `talos/qwen3.8-27b`.
 
 ---
 
-## 2. Bifrost Model Aliases (Virtual Routing)
+## 2. Bifrost Model Routing
 
-Create **virtual model names** in Bifrost so agents reference roles, not specific models. This lets you hot-swap models without changing agent code:
+Bifrost does not currently define role aliases. Agents use explicit
+`<provider>/<model>` identifiers through the `agents-default` virtual key:
 
-```yaml
-# Add to Bifrost helmrelease providers.openai.keys (per-host key blocks):
-
-# ── Virtual aliases (role-based routing) ──
-- model_name: planner          # CEO/strategist
-  litellm_params:
-    model: openai/gpt-oss-120b
-    api_base: http://10.10.10.218:8080/v1
-    api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: coder-fast       # Fast execution (talos)
-  litellm_params:
-    model: openai/gpt-oss-20b
-    api_base: http://10.10.10.81:8080/v1
-    api_key: os.environ/TALOS_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: coder-quality    # High-quality coding (talos MoE)
-  litellm_params:
-    model: openai/ornith-35b
-    api_base: http://10.10.10.81:8080/v1
-    api_key: os.environ/TALOS_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: coder-agentic    # Multi-file agentic coding (talos)
-  litellm_params:
-    model: openai/devstral-24b
-    api_base: http://10.10.10.81:8080/v1
-    api_key: os.environ/TALOS_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: coder-small      # Quick tasks (hephaestus)
-  litellm_params:
-    model: openai/ornith-9b
-    api_base: http://10.10.10.65:8080/v1
-    api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: reasoning        # Math/logic (delphi)
-  litellm_params:
-    model: openai/deepseek-r1-14b
-    api_base: http://10.10.10.18:8080/v1
-    api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: general          # General chat (delphi)
-  litellm_params:
-    model: openai/mistral-small-3.2-24b
-    api_base: http://10.10.10.18:8080/v1
-    api_key: os.environ/DELPHI_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: vision           # Image understanding (hephaestus fast)
-  litellm_params:
-    model: openai/gemma-4-12b
-    api_base: http://10.10.10.65:8080/v1
-    api_key: os.environ/HEPHAESTUS_LLAMASWAP_API_KEY
-    timeout: 600
-
-- model_name: overnight        # Max quality batch (cerberus 235B)
-  litellm_params:
-    model: openai/qwen3-235b-overnight
-    api_base: http://10.10.10.218:8080/v1
-    api_key: os.environ/CERBERUS_LLAMASWAP_API_KEY
-    timeout: 1200
-```
-
-Agents now reference `model: planner`, `model: coder-fast`, etc. — Bifrost routes to the right host.
+| Role | Model |
+|---|---|
+| Planner | `cerberus/gpt-oss-120b` |
+| Coding lead | `cerberus/qwen3-coder-next-80b` |
+| Fast worker | `talos/qwen3.8-27b` |
+| Small worker | `hephaestus/qwen3-4b` |
+| Reasoning | `delphi/deepseek-r1-14b` |
+| General | `delphi/mistral-small-3.2-24b` |
+| Vision | `hephaestus/gemma-4-12b` or `delphi/mistral-small-3.2-24b-vision` |
+| Embeddings | `hephaestus/qwen3-embed` |
+| Reranking | `delphi/bge-reranker-v2-m3` |
 
 ---
 
 ## 3. Agent Swarm Topology (pi-swarm)
+
+The remaining sections are a historical design proposal. They reference role
+aliases that are not deployed and must not be treated as the current Bifrost
+configuration. Use the explicit routes in section 2 when implementing agents.
 
 Using **pi-swarm** (hierarchical, built on pi.dev) with per-tier model assignment:
 
