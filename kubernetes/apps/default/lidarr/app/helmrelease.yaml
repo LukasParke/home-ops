@@ -111,5 +111,11 @@ spec:
         path: "${MEDIA_NFS_PATH}"
         globalMounts:
           - path: /media
+      downloads:
+        type: nfs
+        server: "${MEDIA_NFS_SERVER}"
+        path: "${DOWNLOADS_NFS_PATH}"
+        globalMounts:
+          - path: /downloads
       tmp:
         type: emptyDir

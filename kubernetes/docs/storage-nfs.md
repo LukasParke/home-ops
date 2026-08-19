@@ -52,6 +52,7 @@ Any workload that provisions **`nfs` CSI PVCs** should have its Flux **`Kustomiz
 
 1. A **CSI PVC** for `/config` (RWO) — **`Recreate`** applies.
 2. An **inline NFS volume** for `/media` — often shared read/write at the NAS export level; multiple Pods may mount it depending on export semantics. **`Recreate`** still prevents **two Pods fighting the RWO config PVC** during upgrades.
+3. An **inline NFS volume** for `/downloads` (`${DOWNLOADS_NFS_PATH}`, same `${MEDIA_NFS_SERVER}`) so the `*arr` pods can see the download client's completed files. The download client (qBittorrent on Unraid) reports NAS paths, so each `*arr` app still needs a **Remote Path Mapping** (`/mnt/user/downloads` → `/downloads`) under Settings → Download Clients. Ensure the Unraid share at `${DOWNLOADS_NFS_PATH}` is **NFS-exported** before applying — the cluster mount will fail with `FailedMount` otherwise.
 
 ---
 
