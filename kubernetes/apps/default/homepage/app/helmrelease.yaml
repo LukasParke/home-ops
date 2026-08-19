@@ -116,6 +116,12 @@ spec:
                       type: tautulli
                       url: http://tautulli.default.svc.cluster.local:8181
                       key: ${TAUTULLI_API_KEY}
+                - Seerr:
+                    icon: seerr.png
+                    href: https://seerr.${SECRET_DOMAIN}
+                    description: Media request manager
+                    namespace: default
+                    app: seerr
                 - Immich:
                     icon: immich.png
                     href: https://immich.${SECRET_DOMAIN}
