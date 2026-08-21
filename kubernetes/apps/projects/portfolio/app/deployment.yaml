@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: portfolio
-          image: ghcr.io/lukasparke/parke.dev-portfolio:run-18 # {"$imagepolicy": "flux-system:parke-dev-portfolio"}
+          image: ghcr.io/lukasparke/parke.dev-portfolio:run-19 # {"$imagepolicy": "flux-system:parke-dev-portfolio"}
           imagePullPolicy: Always
           ports:
             - name: http
@@ -33,7 +33,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
-            capabilities: { drop: ["ALL"] }
+            capabilities: {drop: ["ALL"]}
           resources:
             requests:
               cpu: 100m
