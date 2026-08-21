@@ -1,0 +1,22 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: infisical
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Infisical
+    gethomepage.dev/description: Secrets management platform
+    gethomepage.dev/group: Security
+    gethomepage.dev/icon: infisical.png
+    gethomepage.dev/href: "https://infisical.${SECRET_DOMAIN}"
+spec:
+  hostnames: ["infisical.${SECRET_DOMAIN}"]
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: infisical
+          port: 8080

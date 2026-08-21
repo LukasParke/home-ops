@@ -1,0 +1,9 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: infisical
+  namespace: security
+spec:
+  interval: 24h
+  url: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/

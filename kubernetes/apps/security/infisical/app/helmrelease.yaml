@@ -1,0 +1,59 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: infisical
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: infisical-standalone
+      version: "1.10.0"
+      sourceRef:
+        kind: HelmRepository
+        name: infisical
+        namespace: security
+  values:
+    ingress:
+      # Exposed via the HTTPRoute in this directory instead. nginx.enabled
+      # gates the chart's bundled ingress-nginx subchart and must be false
+      # even with ingress disabled, or it deploys a stray controller.
+      enabled: false
+      nginx:
+        enabled: false
+    postgresql:
+      # Postgres runs on cloudnative-pg (cluster-postgres.yaml); the chart
+      # reads DB_CONNECTION_URI from the operator-generated owner secret.
+      enabled: false
+      useExistingPostgresSecret:
+        enabled: true
+        existingConnectionStringSecret:
+          name: infisical-database-app
+          key: uri
+    redis:
+      # Valkey runs as a plain Deployment (redis.yaml); REDIS_URL is provided
+      # through the infisical-secrets secret (envFrom kubeSecretRef below).
+      enabled: false
+    infisical:
+      fullnameOverride: infisical
+      image:
+        tag: v0.162.22
+      replicaCount: 2
+      kubeSecretRef: infisical-secrets
+      deploymentAnnotations:
+        reloader.stakater.com/auto: "true"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: infisical-standalone
+              release: infisical
+      resources:
+        requests:
+          cpu: 150m
+          memory: 512Mi
+        limits:
+          memory: 1Gi
