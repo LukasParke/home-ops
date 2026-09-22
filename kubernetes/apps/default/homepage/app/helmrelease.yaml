@@ -229,6 +229,12 @@ spec:
                     description: Web terminal
                     namespace: default
                     app: termix
+                - Coder:
+                    icon: coder.png
+                    href: https://coder.${SECRET_DOMAIN}
+                    description: Dev environment platform
+                    namespace: default
+                    app: coder
                 - Steel:
                     icon: mdi-web
                     href: https://steel.${SECRET_DOMAIN}

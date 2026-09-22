@@ -28,3 +28,4 @@ resources:
   - ./bifrost/ks.yaml
   - ./steel/ks.yaml
   - ./graphiti/ks.yaml
+  - ./coder/ks.yaml
