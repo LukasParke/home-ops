@@ -1,0 +1,113 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: coder
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: coder
+  interval: 1h
+  values:
+    controllers:
+      coder:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/coder/coder
+              tag: 2.36.6@sha256:a7daad452864428ce1e93d37706b780f248b06ccb2f8e2fcb2ffd9a11f10ebd4
+            env:
+              TZ: Etc/UTC
+              CODER_HTTP_ADDRESS: 0.0.0.0:7080
+              CODER_ACCESS_URL: "https://coder.${SECRET_DOMAIN}"
+              CODER_TELEMETRY_ENABLE: "false"
+              CODER_DATA_DIR: &dataDir /data
+              CODER_PG_CONNECTION_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-database-app
+                    key: uri
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &port 7080
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "false"
+          gethomepage.dev/name: Coder
+          gethomepage.dev/description: Dev environment platform
+          gethomepage.dev/group: Tools
+          gethomepage.dev/icon: coder.png
+          gethomepage.dev/href: "https://coder.${SECRET_DOMAIN}"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: ceph-rbd
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        globalMounts:
+          - path: *dataDir
+      home:
+        type: emptyDir
+        globalMounts:
+          - path: /home/coder
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
