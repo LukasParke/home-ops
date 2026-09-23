@@ -7,4 +7,5 @@ components:
 resources:
   - ./cluster-postgres.yaml
   - ./ocirepository.yaml
+  - ./rbac.yaml
   - ./helmrelease.yaml
