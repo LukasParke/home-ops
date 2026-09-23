@@ -1,0 +1,27 @@
+# Universal Auth machine identity for the Infisical Secrets Operator to
+# sync coder secrets. Replace the changeme values with the client ID and
+# client secret of the machine identity created in the Infisical project.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: coder-infisical-identity
+  namespace: default
+stringData:
+  clientId: ENC[AES256_GCM,data:q061UzDU/Jg=,iv:K0L/62gLgoNhFIs6U2HI8kMSxbZv3GiyxY9igpgEQFI=,tag:QLBVME7VIeEQvCezPUjq0Q==,type:str]
+  clientSecret: ENC[AES256_GCM,data:PNrt/Df26tk=,iv:EiZ3CKLRBE7sWADMUnrKWKhddQNS0rhapzEfA+DDqD4=,tag:YdBRTr/zPRpTXtIkP9uSoA==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB2MXNLanA0R3ROS3hzNUpX
+        SnN0ZG0veGtubmV4QVk3SFZVenFMSGdhdldBCmJWZmFWODVwMVQwaTQyc3MzMVpI
+        MnhUbHdNUDVQd1U4NXZjRkZoODgzUUkKLS0tIHlwNlJxSFRDNG0vd0lueGs3TXpv
+        SUxVUVRLNzMxVVZ1MlRuSkRBY2xUdmsKPdSSQJIOfOT1PL7xtlZYkM6fzG9mY9dK
+        I8DXNuvLXcqsWpD5JYo5I7i5hfAOUmPOq7yYse3gWwabjzTbKQv47Q==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1p6s652l0dn5k5ekcq56f372zq5wmvw0sv29zrw3hvck8jd8p74kqdcp86z
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-09-23T22:13:48Z"
+  mac: ENC[AES256_GCM,data:mF6VVn1Tf3sSf7VRKnwnioqZdQX/SJR7KlxLMrxxahguP4teQ3WNZSG+P5Nb1FslbOU8tHdqfdckN067y8myXAxxvg3BGYI7U8V7/fHIVGfWPsHYz1HU+7EocZE03XLyysMhfc9IWMRlFpavxe47cutvk79aBhu3utg+1n+BD6s=,iv:Y+V2dLtNazF8M+R0ELbgnX4EBzbYj/PE0DLV4moD9LI=,tag:SHgvhZ/baVdh1lZAQUAh+A==,type:str]
+  mac_only_encrypted: true
+  version: 3.13.2
