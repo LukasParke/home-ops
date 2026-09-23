@@ -102,6 +102,15 @@ data "coder_parameter" "dotfiles_uri" {
   order        = 5
 }
 
+data "coder_parameter" "repo" {
+  name         = "repo"
+  display_name = "Repo to clone (optional)"
+  description  = "HTTPS or SSH URL cloned into /home/coder on first start. Private GitHub repos require linking your GitHub account in the Coder dashboard (Account → GitHub)."
+  default      = ""
+  mutable      = true
+  order        = 6
+}
+
 # Autostop is a template-level setting (not a Terraform attribute in this
 # provider): pass --default-ttl 8h to `coder templates create/push`.
 
@@ -114,13 +123,55 @@ locals {
     "coder.owner.id"               = data.coder_workspace_owner.me.id
     "coder.owner.username"         = data.coder_workspace_owner.me.name
   }
+
+  repo_dir = replace(basename(data.coder_parameter.repo.value), ".git", "")
+
+  startup_extras = compact([
+    data.coder_parameter.dotfiles_uri.value != "" ? "coder dotfiles -y ${data.coder_parameter.dotfiles_uri.value}" : null,
+    data.coder_parameter.repo.value != "" ? "git clone ${data.coder_parameter.repo.value} /home/coder/${local.repo_dir} || echo 'WARN: clone failed (link your GitHub account in the Coder dashboard if the repo is private)'" : null,
+  ])
 }
 
 resource "coder_agent" "main" {
   os   = "linux"
   arch = data.coder_provisioner.me.arch
 
-  startup_script = data.coder_parameter.dotfiles_uri.value != "" ? "coder dotfiles -y ${data.coder_parameter.dotfiles_uri.value}" : null
+  # Committer identity: GitHub shows 'Verified' on signed commits only when
+  # this email matches one verified on the GitHub account.
+  env = {
+    GIT_AUTHOR_NAME     = coalesce(data.coder_workspace_owner.me.full_name, data.coder_workspace_owner.me.name)
+    GIT_AUTHOR_EMAIL    = coalesce(data.coder_workspace_owner.me.email, "dev@localhost")
+    GIT_COMMITTER_NAME  = coalesce(data.coder_workspace_owner.me.full_name, data.coder_workspace_owner.me.name)
+    GIT_COMMITTER_EMAIL = coalesce(data.coder_workspace_owner.me.email, "dev@localhost")
+  }
+
+  startup_script = <<-EOT
+    set -e
+
+    # dev tooling (git + ssh) for base images that ship without them
+    if ! command -v git >/dev/null 2>&1; then
+      if command -v apt-get >/dev/null 2>&1; then
+        apt-get update -qq && apt-get install -y -qq git openssh-client
+      elif command -v pacman >/dev/null 2>&1; then
+        pacman -Sy --noconfirm --needed git openssh
+      fi
+    fi
+
+    # per-user SSH keypair (persists in the home volume) for git auth and
+    # SSH-based commit signing; the public key must be registered on GitHub
+    # (Settings → SSH and GPG keys → New SSH key → Key type: Signing Key)
+    mkdir -p $${HOME}/.ssh
+    if [ ! -f $${HOME}/.ssh/id_ed25519 ]; then
+      ssh-keygen -t ed25519 -N "" -C "${coalesce(data.coder_workspace_owner.me.email, data.coder_workspace_owner.me.name)}" -f $${HOME}/.ssh/id_ed25519
+      echo "=== Add this signing key on GitHub → Settings → SSH and GPG keys → New SSH key → Key type: Signing Key ==="
+      cat $${HOME}/.ssh/id_ed25519.pub
+      echo "=========================================================================================================="
+    fi
+    git config --global gpg.format ssh
+    git config --global user.signingkey $${HOME}/.ssh/id_ed25519.pub
+
+    ${join("\n    ", local.startup_extras)}
+  EOT
 }
 
 # One namespace per workspace: torn down with the workspace, keeps workspaces

@@ -17,6 +17,25 @@ The pod is stateless — anything outside `/home/coder` is lost on restart, so
 bake tools into the image or use dotfiles. The `home_disk` parameter is
 immutable after creation (RBD volumes don't shrink).
 
+The startup script bootstraps `git`/`openssh-client` on base images that ship
+without them, generates a per-user SSH keypair in the home volume, and
+configures git for SSH-based **commit signing**.
+
+## Private GitHub repos
+
+Two one-time steps per user:
+
+1. **Link the account:** Coder dashboard → Account → GitHub → Link
+   (enabled by the server-side GitHub external auth configured in
+   `../app/helmrelease.yaml`; requires the OAuth app secrets in SOPS
+   `cluster-secrets`). Linked accounts authenticate HTTPS clones
+   transparently — including the template's optional `repo` parameter.
+2. **Register the signing key:** on first workspace start the agent prints
+   `~/.ssh/id_ed25519.pub`; add it on GitHub → Settings → SSH and GPG keys →
+   New SSH key → **Key type: Signing Key**. Signed commits show *Verified*
+   when the committer email (set from the Coder profile; falls back to
+   `dev@localhost`) matches an email verified on the GitHub account.
+
 ## Create / update the template
 
 Run from a laptop with cluster access (port-forward avoids needing the
