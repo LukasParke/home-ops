@@ -65,12 +65,14 @@ spec:
                   secretKeyRef:
                     name: coder-external-auth
                     key: CODER_GITHUB_CLIENT_SECRET
-              # GitHub OAuth login/signup — same OAuth app as external auth,
-              # second callback URL: /oauth2/github/callback. ALLOW_SIGNUP +
-              # ALLOW_EVERYONE let any GitHub account register (coder refuses
-              # to boot with signup enabled and no policy); tighten to a
-              # GitHub org with CODER_OAUTH2_GITHUB_ALLOWED_ORGS if open
-              # registration is too broad.
+              # GitHub OAuth login/signup — same OAuth app as external auth.
+              # The OAuth app must register these callback URLs:
+              #   /api/v2/users/oauth2/github/callback  (login/signup)
+              #   /external-auth/github/callback        (account linking)
+              # ALLOW_SIGNUP + ALLOW_EVERYONE let any GitHub account register
+              # (coder refuses to boot with signup enabled and no policy);
+              # tighten to a GitHub org with CODER_OAUTH2_GITHUB_ALLOWED_ORGS
+              # if open registration is too broad.
               CODER_OAUTH2_GITHUB_CLIENT_ID:
                 valueFrom:
                   secretKeyRef:
