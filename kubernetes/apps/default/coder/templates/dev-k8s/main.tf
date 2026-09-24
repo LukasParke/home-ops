@@ -128,7 +128,13 @@ locals {
 
   startup_extras = compact([
     data.coder_parameter.dotfiles_uri.value != "" ? "coder dotfiles -y ${data.coder_parameter.dotfiles_uri.value}" : null,
-    data.coder_parameter.repo.value != "" ? "git clone ${data.coder_parameter.repo.value} /home/coder/${local.repo_dir} || echo 'WARN: clone failed (link your GitHub account in the Coder dashboard if the repo is private)'" : null,
+    data.coder_parameter.repo.value != "" ? <<-EOT
+      if [ -d /home/coder/${local.repo_dir}/.git ]; then
+        git -C /home/coder/${local.repo_dir} pull --ff-only || echo 'WARN: repo pull failed'
+      else
+        git clone ${data.coder_parameter.repo.value} /home/coder/${local.repo_dir} || echo 'WARN: clone failed (link your GitHub account in the Coder dashboard if the repo is private, then restart the workspace)'
+      fi
+    EOT : null,
   ])
 }
 
