@@ -15,13 +15,22 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          # Workspace provisioning templates use in-cluster config with this
+          # ServiceAccount (rbac.yaml); app-template defaults the token mount
+          # off, which leaves the terraform kubernetes provider credentialless.
+          automountServiceAccountToken: true
         containers:
           app:
             image:
               repository: ghcr.io/coder/coder
-              tag: 2.36.6@sha256:a7daad452864428ce1e93d37706b780f248b06ccb2f8e2fcb2ffd9a11f10ebd4
+              tag: 2.37.3@sha256:a48f82c2c437e032ce3f6970b4e937a7900cad3c76956955099465b45e542
             env:
               TZ: Etc/UTC
+              # Pinned so the terraform kubernetes provider builds in-cluster
+              # config (host + mounted ServiceAccount token) deterministically.
+              KUBERNETES_SERVICE_HOST: kubernetes.default.svc
+              KUBERNETES_SERVICE_PORT: "443"
               CODER_HTTP_ADDRESS: 0.0.0.0:7080
               CODER_ACCESS_URL: "https://coder.${SECRET_DOMAIN}"
               CODER_TELEMETRY_ENABLE: "false"
