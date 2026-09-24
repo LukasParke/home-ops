@@ -31,6 +31,49 @@ spec:
                   secretKeyRef:
                     name: coder-database-app
                     key: uri
+              # GitHub external auth (private repo clones + git auth in
+              # workspaces). Values live in secret.sops.yaml — replace the
+              # placeholder client id/secret after creating the GitHub OAuth
+              # app; reloader rolls the pod on change. Note: coder validates
+              # the provider at boot, so the client id must never be empty.
+              CODER_EXTERNAL_AUTH_0_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-external-auth
+                    key: CODER_GITHUB_EXTERNAL_AUTH_ID
+              CODER_EXTERNAL_AUTH_0_TYPE:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-external-auth
+                    key: CODER_GITHUB_EXTERNAL_AUTH_TYPE
+              CODER_EXTERNAL_AUTH_0_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-external-auth
+                    key: CODER_GITHUB_CLIENT_ID
+              CODER_EXTERNAL_AUTH_0_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-external-auth
+                    key: CODER_GITHUB_CLIENT_SECRET
+              # GitHub OAuth login/signup — same OAuth app as external auth,
+              # second callback URL: /oauth2/github/callback. ALLOW_SIGNUP +
+              # ALLOW_EVERYONE let any GitHub account register (coder refuses
+              # to boot with signup enabled and no policy); tighten to a
+              # GitHub org with CODER_OAUTH2_GITHUB_ALLOWED_ORGS if open
+              # registration is too broad.
+              CODER_OAUTH2_GITHUB_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-external-auth
+                    key: CODER_OAUTH2_GITHUB_CLIENT_ID
+              CODER_OAUTH2_GITHUB_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: coder-external-auth
+                    key: CODER_OAUTH2_GITHUB_CLIENT_SECRET
+              CODER_OAUTH2_GITHUB_ALLOW_SIGNUP: "true"
+              CODER_OAUTH2_GITHUB_ALLOW_EVERYONE: "true"
             probes:
               liveness: &probes
                 enabled: true

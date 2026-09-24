@@ -9,4 +9,5 @@ resources:
   - ./scheduled-backup.yaml
   - ./ocirepository.yaml
   - ./rbac.yaml
+  - ./secret.sops.yaml
   - ./helmrelease.yaml
