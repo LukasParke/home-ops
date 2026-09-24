@@ -12,3 +12,6 @@ spec:
     initdb:
       database: coder
       owner: coder
+  backup:
+    volumeSnapshot:
+      className: ceph-rbd

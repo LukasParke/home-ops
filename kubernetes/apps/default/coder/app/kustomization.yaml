@@ -6,6 +6,7 @@ components:
   - ../../../../components/volsync
 resources:
   - ./cluster-postgres.yaml
+  - ./scheduled-backup.yaml
   - ./ocirepository.yaml
   - ./rbac.yaml
   - ./helmrelease.yaml

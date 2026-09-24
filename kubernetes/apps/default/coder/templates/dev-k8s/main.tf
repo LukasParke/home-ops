@@ -24,22 +24,27 @@ data "coder_parameter" "image" {
   name         = "image"
   display_name = "Workspace image"
   description  = "Base image for the dev container"
-  default      = "docker.io/library/ubuntu:24.04"
+  default      = "ghcr.io/lukasparke/coder-dev:24.04"
   mutable      = true
   order        = 1
 
   option {
-    name  = "Ubuntu 24.04"
+    name  = "Home dev (prebuilt toolchain)"
+    value = "ghcr.io/lukasparke/coder-dev:24.04"
+    icon  = "/icon/container.svg"
+  }
+  option {
+    name  = "Ubuntu 24.04 (minimal)"
     value = "docker.io/library/ubuntu:24.04"
     icon  = "/icon/ubuntu.svg"
   }
   option {
-    name  = "Debian stable"
+    name  = "Debian stable (minimal)"
     value = "docker.io/library/debian:stable"
     icon  = "/icon/debian.svg"
   }
   option {
-    name  = "Arch Linux"
+    name  = "Arch Linux (minimal)"
     value = "docker.io/library/archlinux:base-devel"
     icon  = "/icon/arch-linux.png"
   }
@@ -96,6 +101,9 @@ data "coder_parameter" "dotfiles_uri" {
   mutable      = true
   order        = 5
 }
+
+# Autostop is a template-level setting (not a Terraform attribute in this
+# provider): pass --default-ttl 8h to `coder templates create/push`.
 
 locals {
   workspace_name = lower("coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}")

@@ -1,0 +1,15 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: coder-database-backup
+spec:
+  cluster:
+    name: coder-database
+  method: volumeSnapshot
+  # CNPG cron is 6-field (seconds first): daily 01:10 UTC, clear of the
+  # 03:00-04:00 VolSync windows. Snapshot-point recovery only — WAL
+  # archiving/PITR would need an object store.
+  schedule: "0 10 1 * * *"
+  backupOwnerReference: cluster
+  immediate: true
