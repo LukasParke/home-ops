@@ -44,13 +44,16 @@ public route or an admin token on the server pod):
 ```sh
 kubectl -n default port-forward deploy/coder 7080:7080
 coder login http://localhost:7080   # first login bootstraps the admin user
+# create accepts --default-ttl directly:
 coder templates create dev-k8s --default-ttl 8h --directory kubernetes/apps/default/coder/templates/dev-k8s
 ```
 
-Updates after editing `main.tf`:
+Updates after editing `main.tf` (`push` takes no `--default-ttl` — TTL is
+a template setting managed with `edit`):
 
 ```sh
-coder templates push dev-k8s --default-ttl 8h --directory kubernetes/apps/default/coder/templates/dev-k8s
+coder templates push dev-k8s --directory kubernetes/apps/default/coder/templates/dev-k8s
+coder templates edit dev-k8s --default-ttl 8h   # only needed to change TTL
 ```
 
 `terraform init` artifacts (`.terraform/`, `.terraform.lock.hcl`) are created
