@@ -235,6 +235,12 @@ spec:
                     description: Dev environment platform
                     namespace: default
                     app: coder
+                - OpenHands:
+                    icon: mdi-robot
+                    href: https://openhands.${SECRET_DOMAIN}
+                    description: AI agent platform
+                    namespace: default
+                    app: openhands
                 - Steel:
                     icon: mdi-web
                     href: https://steel.${SECRET_DOMAIN}
