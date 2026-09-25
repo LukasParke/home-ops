@@ -10,6 +10,13 @@ spec:
     name: openhands
   interval: 1h
   values:
+    defaultPodOptions:
+      securityContext:
+        # The canvas image runs as uid 10001; without fsGroup the ceph-rbd
+        # PVCs mount root-owned and the agent-server dies on startup
+        # (PermissionError creating ~/.openhands/agent-canvas).
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
     controllers:
       openhands:
         strategy: Recreate
