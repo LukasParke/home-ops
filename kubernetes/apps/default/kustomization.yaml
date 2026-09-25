@@ -29,4 +29,3 @@ resources:
   - ./steel/ks.yaml
   - ./graphiti/ks.yaml
   - ./coder/ks.yaml
-  - ./openhands/ks.yaml

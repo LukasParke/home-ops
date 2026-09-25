@@ -14,4 +14,5 @@ resources:
   - ./observability
   - ./forgejo
   - ./rook-ceph
+  - ./openhands
   - ./volsync-system
