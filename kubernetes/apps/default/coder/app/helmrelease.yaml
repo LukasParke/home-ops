@@ -32,6 +32,11 @@ spec:
               KUBERNETES_SERVICE_HOST: kubernetes.default.svc
               KUBERNETES_SERVICE_PORT: "443"
               CODER_HTTP_ADDRESS: 0.0.0.0:7080
+              # All v2.37.3 experiments (minus the unused "example"):
+              # enables agent chats' virtual desktop/computer use, MCP tool
+              # search, advisor, notifications, MCP HTTP server, etc. Review
+              # the enum in codersdk/deployment.go when upgrading Coder.
+              CODER_EXPERIMENTS: "auto-fill-parameters,notifications,workspace-usage,oauth2,mcp-server-http,mcp-tool-search,workspace-build-updates,nats_pubsub,workspace-capable-licensing,ai-gateway-seat-exclusion,chat-advisor,chat-virtual-desktop,agent-lifecycle-hooks"
               CODER_ACCESS_URL: "https://coder.${SECRET_DOMAIN}"
               CODER_TELEMETRY_ENABLE: "false"
               CODER_DATA_DIR: &dataDir /data
