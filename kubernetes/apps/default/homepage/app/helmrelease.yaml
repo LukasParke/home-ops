@@ -239,7 +239,7 @@ spec:
                     icon: mdi-robot
                     href: https://openhands.${SECRET_DOMAIN}
                     description: AI agent platform
-                    namespace: default
+                    namespace: openhands
                     app: openhands
                 - Steel:
                     icon: mdi-web

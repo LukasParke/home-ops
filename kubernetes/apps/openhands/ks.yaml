@@ -13,7 +13,7 @@ spec:
     - name: volsync
       namespace: volsync-system
   interval: 1h
-  path: ./kubernetes/apps/default/openhands/app
+  path: ./kubernetes/apps/openhands/app
   postBuild:
     substitute:
       VOLSYNC_APP: openhands
@@ -27,5 +27,5 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: default
+  targetNamespace: openhands
   wait: true
