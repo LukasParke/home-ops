@@ -1,0 +1,131 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openhands
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: openhands
+  interval: 1h
+  values:
+    controllers:
+      openhands:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            # Tag pinned by digest; check for new releases at
+            # github.com/OpenHands — the image tracks Agent Canvas.
+            image:
+              repository: ghcr.io/openhands/agent-canvas
+              tag: latest@sha256:5f9bcf4d93a2f48b93200e562283b518b8f65b4f9f75c0dc0b76f7b12b156111
+            env:
+              TZ: Etc/UTC
+              # Sandboxes run against the DinD sidecar on the pod's
+              # shared loopback — Talos has no host Docker daemon.
+              DOCKER_HOST: tcp://127.0.0.1:2376
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &port 8000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+          dind:
+            # Privileged by necessity: Talos has no host Docker daemon, so
+            # sandboxes run inside this sidecar. Contained to this pod.
+            image:
+              repository: docker.io/library/docker
+              tag: 28-dind@sha256:2a232a42256f70d78e3cc5d2b5d6b3276710a0de0596c145f627ecfae90282ac
+            args:
+              - --host=tcp://0.0.0.0:2376
+              - --tls=false
+            env:
+              DOCKER_TLS_CERTDIR: ""
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                memory: 4Gi
+    service:
+      app:
+        ports:
+          http:
+            port: &port 8000
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "false"
+          gethomepage.dev/name: OpenHands
+          gethomepage.dev/description: AI agent platform
+          gethomepage.dev/group: Tools
+          gethomepage.dev/icon: mdi-robot
+          gethomepage.dev/href: "https://openhands.${SECRET_DOMAIN}"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: ceph-rbd
+        accessMode: ReadWriteOnce
+        size: 5Gi
+        advancedMounts:
+          openhands:
+            app:
+              - path: /home/openhands/.openhands
+      projects:
+        enabled: true
+        type: persistentVolumeClaim
+        storageClass: ceph-rbd
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        advancedMounts:
+          openhands:
+            app:
+              - path: /projects
+      docker:
+        type: emptyDir
+        sizeLimit: 20Gi
+        advancedMounts:
+          openhands:
+            dind:
+              - path: /var/lib/docker
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          openhands:
+            app:
+              - path: /tmp

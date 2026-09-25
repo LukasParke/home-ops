@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openhands
+spec:
+  dependsOn:
+    - name: csi-driver-nfs
+      namespace: kube-system
+    - name: rest-server
+      namespace: volsync-system
+    - name: volsync
+      namespace: volsync-system
+  interval: 1h
+  path: ./kubernetes/apps/default/openhands/app
+  postBuild:
+    substitute:
+      VOLSYNC_APP: openhands
+      VOLSYNC_PVC: openhands-config
+      VOLSYNC_SCHEDULE: "10 4 * * *"
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: default
+  wait: true
