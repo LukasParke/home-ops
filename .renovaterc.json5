@@ -101,9 +101,8 @@
       automerge: false,
     },
     {
-      description: "Talos/Kubernetes: only tuppr-driven patch bumps may automerge; minors need a human",
+      description: "Talos/Kubernetes: merging an installer bump makes tuppr reboot every node, so always a human PR",
       matchPackageNames: ["/siderolabs\\/(installer|kubelet|talosctl)/"],
-      matchUpdateTypes: ["major", "minor"],
       automerge: false,
     },
     {
