@@ -14,7 +14,7 @@ spec:
     copyMethod: Snapshot
     volumeSnapshotClassName: ceph-rbd
     cacheStorageClassName: ceph-rbd
-    cacheCapacity: 2Gi
+    cacheCapacity: ${VOLSYNC_CACHE_CAPACITY:=2Gi}
     pruneIntervalDays: 7
     retain:
       daily: 7

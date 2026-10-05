@@ -17,6 +17,7 @@ spec:
   postBuild:
     substitute:
       VOLSYNC_APP: radarr
+      VOLSYNC_CACHE_CAPACITY: 6Gi
       VOLSYNC_PVC: radarr
       VOLSYNC_SCHEDULE: "35 3 * * *"
     substituteFrom:
