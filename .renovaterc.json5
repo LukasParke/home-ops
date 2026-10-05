@@ -89,6 +89,7 @@
         "/coredns/",
         "/envoy/",
         "/spegel/",
+        "/external-dns/",
         "/bjw-s-labs\\/helm\\/app-template/",
       ],
       matchUpdateTypes: ["major", "minor"],
