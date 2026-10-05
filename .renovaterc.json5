@@ -13,6 +13,9 @@
   dependencyDashboard: true,
   dependencyDashboardTitle: "Renovate Dashboard :robot:",
   schedule: ["every weekend"],
+  // ghcr.io/quay.io don't expose release timestamps; without this Renovate
+  // holds every minimumReleaseAge-gated update from those registries forever.
+  minimumReleaseAgeBehaviour: "timestamp-optional",
   ignorePaths: ["**/*.sops.*"],
   flux: {
     managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/"],
@@ -72,6 +75,41 @@
       matchUpdateTypes: ["minor", "patch", "digest"],
       minimumReleaseAge: "3 days",
       ignoreTests: false,
+    },
+    {
+      description: "Require a human for 0.x minors, cluster-critical infra and app-template (fans out to every app)",
+      matchPackageNames: [
+        "/cilium/",
+        "/cert-manager/",
+        "/rook-ceph/",
+        "/ceph-csi/",
+        "/flux-operator/",
+        "/flux-instance/",
+        "/kube-prometheus-stack/",
+        "/coredns/",
+        "/envoy/",
+        "/spegel/",
+        "/bjw-s-labs\\/helm\\/app-template/",
+      ],
+      matchUpdateTypes: ["major", "minor"],
+      automerge: false,
+    },
+    {
+      description: "0.x minors can break at any time",
+      matchUpdateTypes: ["minor"],
+      matchCurrentVersion: "/^v?0\\./",
+      automerge: false,
+    },
+    {
+      description: "Talos/Kubernetes: only tuppr-driven patch bumps may automerge; minors need a human",
+      matchPackageNames: ["/siderolabs\\/(installer|kubelet|talosctl)/"],
+      matchUpdateTypes: ["major", "minor"],
+      automerge: false,
+    },
+    {
+      description: "Kubernetes upgrades go one minor at a time (skipping 1.36 is unsupported)",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      allowedVersions: "<1.37.0",
     },
     {
       description: "Ignore images managed by Flux image-automation",
