@@ -6,7 +6,9 @@ metadata:
 spec:
   allowFirstLastIPs: "No"
   blocks:
-    - cidr: "#{ node_cidr }#"
+    # Only .64-.79 may be handed to LoadBalancer Services (gateways are pinned at .67-.69).
+    # Never the whole node network: it contains the nodes, the kube VIP and DHCP leases.
+    - cidr: "10.10.10.64/28"
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
