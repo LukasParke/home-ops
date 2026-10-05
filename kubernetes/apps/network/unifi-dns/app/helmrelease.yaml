@@ -50,10 +50,6 @@ spec:
             port: http-webhook
           initialDelaySeconds: 10
           timeoutSeconds: 5
-    # TEMPORARY: first deploy against the Integration API only logs planned changes.
-    # Remove once the logs look right.
-    extraArgs:
-      - --dry-run
     triggerLoopOnEvent: true
     policy: sync
     sources:
