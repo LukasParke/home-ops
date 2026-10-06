@@ -92,7 +92,17 @@ spec:
     prometheus:
       prometheusSpec:
         retention: 15d
+        # ~38 MB/h observed => ~14 GB for 15d; cap below the PVC so the TSDB trims itself.
+        retentionSize: 20GB
         replicas: 1
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-rbd
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 25Gi
         resources:
           requests:
             cpu: 200m
