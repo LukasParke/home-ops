@@ -35,6 +35,17 @@ spec:
     cephClusterSpec:
       dataDirHostPath: /var/lib/rook
 
+      # Ceph 20 flags the legacy `aes` cephx cipher as insecure. Rotate only the
+      # daemon keys (osd/mgr/...) to aes256k: user-space daemons understand it.
+      # CSI keeps Rook's pinned `aes` because the kernel RBD client on the nodes
+      # may not support aes256k, so the client-key warnings remain by design.
+      security:
+        cephx:
+          daemon:
+            keyType: aes256k
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+
       mon:
         count: 3
         allowMultiplePerNode: false
