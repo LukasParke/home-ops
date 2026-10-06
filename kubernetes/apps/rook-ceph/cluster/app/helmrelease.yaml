@@ -41,6 +41,10 @@ spec:
       # may not support aes256k, so the client-key warnings remain by design.
       security:
         cephx:
+          # Explicit list (aes still needed by CSI/kernel clients). Left empty,
+          # Rook enables ALL ciphers via Ceph's emergency override, which
+          # raises AUTH_EMERGENCY_CIPHERS_SET permanently.
+          allowedCiphers: ["aes", "aes256k"]
           daemon:
             keyType: aes256k
             keyRotationPolicy: KeyGeneration
