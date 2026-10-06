@@ -6,10 +6,10 @@ metadata:
 spec:
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-    version: v1.13.6
+    version: v1.13.11
   talosctl:
     image:
-      tag: v1.13.6
+      tag: v1.13.11
   maintenance:
     windows:
       - start: "0 2 * * 0"
