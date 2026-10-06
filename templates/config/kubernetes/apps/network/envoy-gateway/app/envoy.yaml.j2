@@ -48,6 +48,11 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
     external-dns.kubernetes.io/target: external.${SECRET_DOMAIN}
+    # gatus-sidecar merges this into every HTTPRoute endpoint on this gateway:
+    # a public hostname failing 2 probes in a row pages Discord.
+    gatus.home-operations.com/endpoint: |
+      alerts:
+        - type: discord
 spec:
   gatewayClassName: envoy
   infrastructure:
