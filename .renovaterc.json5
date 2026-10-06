@@ -112,6 +112,13 @@
       allowedVersions: "<1.37.0",
     },
     {
+      description: "Ubuntu uses its own YY.MM scheme; without this Renovate treats codename tags (resolute) as newer than 24.04",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["docker.io/library/ubuntu", "ubuntu"],
+      versioning: "ubuntu",
+      automerge: false,
+    },
+    {
       description: "Ignore images managed by Flux image-automation",
       matchDatasources: ["docker"],
       matchPackageNames: ["/ghcr.io/lukasparke/parke.dev/"],
