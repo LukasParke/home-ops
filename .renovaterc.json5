@@ -125,11 +125,6 @@
       enabled: false,
     },
     {
-      description: "Ignore k3s false positive from the custom-manager example comment above",
-      matchPackageNames: ["k3s-io/k3s"],
-      enabled: false,
-    },
-    {
       matchUpdateTypes: ["major"],
       semanticCommitType: "feat",
       commitMessagePrefix: "{{semanticCommitType}}({{semanticCommitScope}})!:",
@@ -219,15 +214,12 @@
         "/(^|/).+\\.ya?ml(?:\\.j2)?$/",
       ],
       matchStrings: [
-        // # renovate: datasource=github-releases depName=k3s-io/k3s
-        // k3s_release_version: &version v1.29.0+k3s1
-        // # renovate: datasource=helm depName=cilium repository=https://helm.cilium.io
-        // version: 1.15.1
-        // # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-        // KUBERNETES_VERSION=v1.31.1
+        // Annotated deps: a renovate marker comment in a file, with the version on the next
+        // line (see talos/talenv.yaml for a live example). NOTE: do not paste literal
+        // marker examples here; the shared preset scans every file, this one included,
+        // and would track them as real dependencies (it did, for k3s and the kubelet).
         "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+(:\\s|=)(&\\S+\\s)?(?<currentValue>\\S+)",
-        // # renovate: datasource=docker depName=ghcr.io/prometheus-operator/prometheus-operator
-        // https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.80.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+        // Same marker, with the version taken from a URL path on the next line.
         "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>(v|\\d)[^/]+)",
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
