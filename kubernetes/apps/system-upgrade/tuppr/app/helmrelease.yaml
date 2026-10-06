@@ -45,10 +45,7 @@ spec:
       leaderElection:
         enabled: true
       metrics:
-        enabled: true
-        port: 8080
-        secure: false
-      health:
+        # single always-on operational port (/metrics, /healthz, /readyz)
         port: 8081
 
     webhook:
