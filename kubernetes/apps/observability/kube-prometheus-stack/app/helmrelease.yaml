@@ -12,7 +12,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: "87.21.0"
+      version: "91.9.0"
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -62,7 +62,6 @@ spec:
         targetPort: 10257
       serviceMonitor:
         scheme: https
-        insecureSkipVerify: true
         interval: 30s
     kubeScheduler:
       enabled: true
@@ -73,7 +72,6 @@ spec:
         targetPort: 10259
       serviceMonitor:
         scheme: https
-        insecureSkipVerify: true
         interval: 30s
     kubeEtcd:
       enabled: true
