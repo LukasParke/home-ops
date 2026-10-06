@@ -20,6 +20,10 @@ metadata:
   name: graphiti-mcp-external
   annotations:
     gethomepage.dev/enabled: "false"
+    # API-key gated at the gateway: 401 without a key means healthy.
+    gatus.home-operations.com/endpoint: |
+      conditions:
+        - "[STATUS] == any(200, 401)"
 spec:
   hostnames: ["memory.${SECRET_DOMAIN}"]
   parentRefs:
