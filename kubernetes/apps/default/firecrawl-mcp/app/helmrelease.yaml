@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: docker.io/node
-              tag: 24-alpine
+              tag: 26-alpine
             # npx fetches the pinned package at startup (image stays stock).
             command: ["npx", "-y", "firecrawl-mcp@3.23.6"]
             env:
