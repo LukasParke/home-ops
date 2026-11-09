@@ -41,7 +41,7 @@ spec:
           ui:
             image:
               repository: ghcr.io/steel-dev/steel-browser-ui
-              tag: latest@sha256:9d31cdc7e0f704c14d0167b36808dbbaad4a1b81e9d40f3a4bb42ba69a8988f7
+              tag: latest@sha256:da763ba00f438ed4a819f057adaaa4b7412e80abf79db63c16a066b31389508b
               pullPolicy: IfNotPresent
             env:
               API_URL: http://localhost:3000
