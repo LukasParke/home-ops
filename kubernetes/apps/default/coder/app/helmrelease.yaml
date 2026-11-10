@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: ghcr.io/coder/coder
-              tag: v2.38.5@sha256:28de41a8546e37e0fbed91565a4acd76ec7571f3317f34937c6f556a16ab71cf
+              tag: v2.39.1@sha256:77500de63a62f733bb1fbbf79da85e8ad4d6ca582e964f5d6021f46f6dc7fc29
             env:
               TZ: Etc/UTC
               # Pinned so the terraform kubernetes provider builds in-cluster
