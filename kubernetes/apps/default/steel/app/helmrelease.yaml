@@ -15,7 +15,7 @@ spec:
           app:
             image:
               repository: ghcr.io/steel-dev/steel-browser-api
-              tag: latest@sha256:3a4c289f2a3e4efa0c2933ef7525fde5537fe1dacc310ee1f327169d223ab20f
+              tag: latest@sha256:0b4f2ef78f62a4352cd65eadc21380c23a72d808a0e23c229a7a69c1ee400f4f
               pullPolicy: IfNotPresent
             # TODO: remove command override once upstream rebuilds the image with
             # chromium >= 150.0.7871.100. The baked-in 150.0.7871.46 crashes on
