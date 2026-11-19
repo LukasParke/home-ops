@@ -4,6 +4,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: home-assistant
+  annotations:
+    # Create once, never patch: the live claim is pinned to an existing PV via
+    # spec.volumeName, which is immutable and intentionally not in git.
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 spec:
   accessModes: ["ReadWriteOnce"]
   storageClassName: ceph-rbd
