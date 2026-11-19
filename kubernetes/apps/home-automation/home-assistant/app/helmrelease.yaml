@@ -20,6 +20,18 @@ spec:
           # DHCP discovery work. Port 8123 is then also reachable on the node IP.
           hostNetwork: true
           dnsPolicy: ClusterFirstWithHostNet
+        initContainers:
+          matter-permissions:
+            image: &matterImage
+              repository: ghcr.io/matter-js/matterjs-server
+              tag: 1.6.0@sha256:9eb98c839d0b4b07f9230b96ad52de570f7f2a7c286c5992b4c04b6b26c08a3f
+            command: ["sh", "-c", "chown 1000:1000 /data"]
+            securityContext:
+              runAsUser: 0
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+                add: ["CHOWN"]
         containers:
           app:
             image:
@@ -66,6 +78,35 @@ spec:
                 memory: 512Mi
               limits:
                 memory: 2Gi
+          matter-server:
+            image: *matterImage
+            env:
+              TZ: America/Chicago
+              STORAGE_PATH: /data
+              PRIMARY_INTERFACE: eno1
+              # No auth on the WebSocket API: bind to localhost so only HA
+              # (same pod, host network) can reach it, not the whole LAN.
+              LISTEN_ADDRESS: 127.0.0.1
+              NODE_OPTIONS: --max-old-space-size=512
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 20m
+                memory: 128Mi
+              limits:
+                memory: 768Mi
     service:
       app:
         ports:
@@ -92,7 +133,17 @@ spec:
     persistence:
       config:
         existingClaim: home-assistant
-        globalMounts:
-          - path: /config
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /config
+            # Matter fabric credentials sit on the HA volume so the nightly
+            # VolSync backup covers them; losing them means re-pairing.
+            matter-permissions:
+              - path: /data
+                subPath: matter-server
+            matter-server:
+              - path: /data
+                subPath: matter-server
       tmp:
         type: emptyDir
