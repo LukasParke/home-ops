@@ -15,13 +15,18 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          # Host networking puts HA on the LAN so mDNS (Zeroconf), SSDP and
+          # DHCP discovery work. Port 8123 is then also reachable on the node IP.
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
         containers:
           app:
             image:
               repository: ghcr.io/home-assistant/home-assistant
               tag: 2026.11.1@sha256:6785d1eca68747a524c156faae1b139ed415c07357386ae6fe17291986e59e82
             env:
-              TZ: Etc/UTC
+              TZ: America/Chicago
             probes:
               liveness:
                 enabled: true
@@ -51,7 +56,10 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
-              capabilities: { drop: ["ALL"] }
+              capabilities:
+                drop: ["ALL"]
+                # Raw sockets for the DHCP discovery watcher (aiodhcpwatcher)
+                add: ["NET_RAW"]
             resources:
               requests:
                 cpu: 100m
@@ -83,11 +91,7 @@ spec:
                 port: *port
     persistence:
       config:
-        enabled: true
-        type: persistentVolumeClaim
-        storageClass: ceph-rbd
-        accessMode: ReadWriteOnce
-        size: 10Gi
+        existingClaim: home-assistant
         globalMounts:
           - path: /config
       tmp:

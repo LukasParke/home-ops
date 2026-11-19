@@ -1,0 +1,12 @@
+---
+# Managed outside the chart so the volume survives HelmRelease reinstalls.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assistant
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: ceph-rbd
+  resources:
+    requests:
+      storage: 10Gi
