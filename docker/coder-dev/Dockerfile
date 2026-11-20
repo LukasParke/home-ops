@@ -2,7 +2,7 @@
 # Built multi-arch by .github/workflows/coder-dev-image.yaml and published to
 # ghcr.io/lukasparke/coder-dev, so workspace pods skip the runtime
 # apt-get bootstrap entirely.
-FROM docker.io/library/ubuntu:24.04
+FROM docker.io/library/ubuntu:26.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
