@@ -28,7 +28,7 @@ spec:
             # github.com/OpenHands — the image tracks Agent Canvas.
             image:
               repository: ghcr.io/openhands/agent-canvas
-              tag: latest@sha256:ee59708177e8daa2702c88bf85107e738768a0ea72d37e0232ff71661ded07d1
+              tag: latest@sha256:bcdbb3fb9610f14eda67f39fc609f162ad8c3c28697d6ff3f4adae55c15c3f1d
             env:
               TZ: Etc/UTC
               # Sandboxes run against the DinD sidecar on the pod's
