@@ -40,13 +40,6 @@ spec:
                 interval: 5m
                 conditions:
                   - "[STATUS] == 200"
-              - name: Bifrost
-                url: "https://bifrost.${SECRET_DOMAIN}/health"
-                interval: 1m
-                alerts:
-                  - type: discord
-                conditions:
-                  - "[STATUS] == 200"
               - name: Parke.dev (apex)
                 url: "https://${SECRET_DOMAIN}"
                 interval: 1m
@@ -54,15 +47,6 @@ spec:
                   - type: discord
                 conditions:
                   - "[STATUS] == 200"
-              # 401 is the HEALTHY response here: proves envoy-external +
-              # SecurityPolicy + graphiti service are all up.
-              - name: Graphiti MCP (external route)
-                url: "https://memory.${SECRET_DOMAIN}/mcp"
-                interval: 1m
-                alerts:
-                  - type: discord
-                conditions:
-                  - "[STATUS] == 401"
     controllers:
       gatus:
         strategy: Recreate
