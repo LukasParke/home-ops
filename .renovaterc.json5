@@ -16,7 +16,7 @@
   // ghcr.io/quay.io don't expose release timestamps; without this Renovate
   // holds every minimumReleaseAge-gated update from those registries forever.
   minimumReleaseAgeBehaviour: "timestamp-optional",
-  ignorePaths: ["**/*.sops.*"],
+  ignorePaths: ["**/*.sops.*", "kubernetes/archive/**"],
   flux: {
     managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/"],
   },

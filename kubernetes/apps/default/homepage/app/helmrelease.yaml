@@ -211,42 +211,12 @@ spec:
                     description: HTTP debug echo service
                     namespace: default
                     app: echo
-                - Firecrawl:
-                    icon: mdi-fire
-                    href: https://firecrawl.${SECRET_DOMAIN}
-                    description: Web crawling and scraping API
-                    namespace: default
-                    podSelector: app=firecrawl-api
-                - Bifrost:
-                    icon: mdi-lightning-bolt
-                    href: https://bifrost.${SECRET_DOMAIN}
-                    description: AI gateway and LLM proxy
-                    namespace: default
-                    app: bifrost
                 - Termix:
                     icon: mdi-console
                     href: https://termix.${SECRET_DOMAIN}
                     description: Web terminal
                     namespace: default
                     app: termix
-                - Coder:
-                    icon: coder.png
-                    href: https://coder.${SECRET_DOMAIN}
-                    description: Dev environment platform
-                    namespace: default
-                    app: coder
-                - OpenHands:
-                    icon: mdi-robot
-                    href: https://openhands.${SECRET_DOMAIN}
-                    description: AI agent platform
-                    namespace: openhands
-                    app: openhands
-                - Steel:
-                    icon: mdi-web
-                    href: https://steel.${SECRET_DOMAIN}
-                    description: Headless browser API for agents
-                    namespace: default
-                    app: steel
             - GitOps:
                 - Forgejo:
                     icon: forgejo.png
