@@ -65,7 +65,7 @@ spec:
             # sandboxes run inside this sidecar. Contained to this pod.
             image:
               repository: docker.io/library/docker
-              tag: 28-dind@sha256:2a232a42256f70d78e3cc5d2b5d6b3276710a0de0596c145f627ecfae90282ac
+              tag: 29-dind@sha256:fbbc96e0af32cdc190aff92ba97a1281a115351a723afe21af78879cc55126b0
             args:
               - --host=tcp://0.0.0.0:2376
               - --tls=false
